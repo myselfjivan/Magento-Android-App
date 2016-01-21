@@ -22,4 +22,5 @@
         app:headerLayout="@layout/nav_header_mr_foody"
         app:menu="@menu/activity_mr_foody_drawer" />
 
+
 </android.support.v4.widget.DrawerLayout>

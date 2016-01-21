@@ -12,16 +12,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 
 public class MrFoody extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-
+    public Button click;
+    OauthToken oauthToken = new OauthToken();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mr_foody);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        //click = new Button()
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -29,6 +32,13 @@ public class MrFoody extends AppCompatActivity
             public void onClick(View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
+            }
+        });
+        click = (Button)findViewById(R.id.clickMe);
+        click.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                oauthToken.oauthCall();
             }
         });
 
@@ -88,9 +98,9 @@ public class MrFoody extends AppCompatActivity
 
         } else if (id == R.id.nav_manage) {
 
-        } else if (id == R.id.nav_share) {
+        //} else if (id == R.id.nav_share) {
 
-        } else if (id == R.id.nav_send) {
+        //} else if (id == R.id.nav_send) {
 
         }
 
