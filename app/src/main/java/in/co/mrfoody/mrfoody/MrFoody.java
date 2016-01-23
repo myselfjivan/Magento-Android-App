@@ -1,8 +1,11 @@
 package in.co.mrfoody.mrfoody;
 
+import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -14,12 +17,23 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 
+import org.ksoap2.SoapEnvelope;
+import org.ksoap2.serialization.SoapObject;
+import org.ksoap2.serialization.SoapSerializationEnvelope;
+import org.ksoap2.transport.HttpTransportSE;
+
+import in.co.mrfoody.mrfoody.Service.mrfoodySer;
+
 public class MrFoody extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-    public Button click;
-    OauthToken oauthToken = new OauthToken();
+
+    private static final String NAMESPACE = "urn:Magento";
+    private static final String URL = "http://dev.mrfoody.co.in/api/v2_soap/";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        new SessionIdGenerator().execute();
+        startService(new Intent(this, mrfoodySer.class));
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mr_foody);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -34,13 +48,7 @@ public class MrFoody extends AppCompatActivity
                         .setAction("Action", null).show();
             }
         });
-        click = (Button)findViewById(R.id.clickMe);
-        click.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                oauthToken.oauthCall();
-            }
-        });
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -107,5 +115,67 @@ public class MrFoody extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    public class SessionIdGenerator extends AsyncTask<String,String,String>{
+
+        @Override
+        protected String doInBackground(String... params) {
+            try {
+
+                SoapSerializationEnvelope env = new SoapSerializationEnvelope(
+                        SoapEnvelope.VER11);
+
+                env.dotNet = false;
+                env.xsd = SoapSerializationEnvelope.XSD;
+                env.enc = SoapSerializationEnvelope.ENC;
+
+                SoapObject request = new SoapObject(NAMESPACE, "login");
+
+                request.addProperty("username","testingUser");
+                request.addProperty("apiKey","1f46c6a95d4949c979e929acccc254b4");
+
+                env.setOutputSoapObject(request);
+
+                HttpTransportSE androidHttpTransport = new HttpTransportSE(URL);
+
+                androidHttpTransport.call("", env);
+                Object result = env.getResponse();
+
+                Log.d("sessionId", result.toString());
+
+                String sessionId = result.toString();
+
+                request = new SoapObject(NAMESPACE, "catalogCategoryTree");
+                request.addProperty("sessionId",sessionId );
+                request.addProperty("categoryId",6);
+                //request.addProperty("storeView",);
+                //request.addProperty("attributes",);
+
+                env.setOutputSoapObject(request);
+                androidHttpTransport.call("", env);
+
+                result = env.getResponse();
+
+                Log.d("Catalog Category Tree", result.toString());
+
+                request = new SoapObject(NAMESPACE, "catalogProductList");
+                request.addProperty("sessionId",sessionId );
+                //request.addProperty("categoryId",6);
+                //request.addProperty("storeView",);
+                //request.addProperty("attributes",);
+
+                env.setOutputSoapObject(request);
+                androidHttpTransport.call("", env);
+
+                result = env.getResponse();
+
+                Log.d("Catalog Product List", result.toString());
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
     }
 }
