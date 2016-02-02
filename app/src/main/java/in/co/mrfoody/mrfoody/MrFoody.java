@@ -3,6 +3,7 @@ package in.co.mrfoody.mrfoody;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
@@ -19,17 +20,27 @@ import android.widget.Button;
 
 import org.ksoap2.SoapEnvelope;
 import org.ksoap2.serialization.SoapObject;
+import org.ksoap2.serialization.SoapPrimitive;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import in.co.mrfoody.mrfoody.Ksoap2Parser.ResponceParser;
 import in.co.mrfoody.mrfoody.Service.mrfoodySer;
+import in.co.mrfoody.mrfoody.Catalog.catalogCategoryLevel;
 
 public class MrFoody extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final String NAMESPACE = "urn:Magento";
     private static final String URL = "http://dev.mrfoody.co.in/api/v2_soap/";
+    catalogCategoryLevel catalogCategoryLevel = new catalogCategoryLevel();
 
+    public List<catalogCategoryLevel> list = new ArrayList<catalogCategoryLevel>();
+
+    //catalogCategoryLevel.ArrayOfCatalogCategoryEntitiesNoChildrenTopCategory arrayOfCatalogCategoryEntitiesNoChildrenTopCategory = catalogCategoryLevel.new ArrayOfCatalogCategoryEntitiesNoChildrenTopCategory();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         new SessionIdGenerator().execute();
@@ -74,6 +85,13 @@ public class MrFoody extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.mr_foody, menu);
+        //menu.clear();
+        //MenuItem menuItem = null;
+        /*for (int i=0; i < list.size(); i++){
+            assert menuItem != null;
+            menuItem.setTitle(catalogCategoryLevel.getName());
+        };
+        */
         return true;
     }
 
@@ -98,6 +116,7 @@ public class MrFoody extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
+        /*
         if (id == R.id.nav_camera) {
             // Handle the camera action
         } else if (id == R.id.nav_gallery) {
@@ -111,11 +130,13 @@ public class MrFoody extends AppCompatActivity
         //} else if (id == R.id.nav_send) {
 
         }
+        */
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
 
     public class SessionIdGenerator extends AsyncTask<String,String,String>{
 
@@ -145,10 +166,9 @@ public class MrFoody extends AppCompatActivity
                 Log.d("sessionId", result.toString());
 
                 String sessionId = result.toString();
-
-                request = new SoapObject(NAMESPACE, "catalogCategoryTree");
+                request = new SoapObject(NAMESPACE, "catalogCategoryLevel");
                 request.addProperty("sessionId",sessionId );
-                request.addProperty("categoryId",6);
+                request.addProperty("parentCategory",6);
                 //request.addProperty("storeView",);
                 //request.addProperty("attributes",);
 
@@ -157,20 +177,54 @@ public class MrFoody extends AppCompatActivity
 
                 result = env.getResponse();
 
-                Log.d("Catalog Category Tree", result.toString());
+                Log.d("catalog Category Level", result.toString());
 
-                request = new SoapObject(NAMESPACE, "catalogProductList");
-                request.addProperty("sessionId",sessionId );
-                //request.addProperty("categoryId",6);
-                //request.addProperty("storeView",);
-                //request.addProperty("attributes",);
+                SoapObject resultRes = (SoapObject)env.getResponse(); //get response
 
-                env.setOutputSoapObject(request);
-                androidHttpTransport.call("", env);
+                try {
 
-                result = env.getResponse();
+                    //ResponceParser.parseBusinessObject(resultRes.getProperty(0).toString(), arrayOfCatalogCategoryEntitiesNoChildrenTopCategory);
+                    for (int i = 0; i < resultRes.getPropertyCount(); i++) {
+                        in.co.mrfoody.mrfoody.Catalog.catalogCategoryLevel data = new catalogCategoryLevel();
+                        SoapObject root = (SoapObject) resultRes.getProperty(i);
+                        data.setCategoryId(root.getProperty("category_id").toString());
+                        data.setName(root.getProperty("name").toString());
+                        //String category_id = root.getProperty("category_id").toString();
+                        //Log.e("vale of category id ",category_id);
+                        list.add(data);
 
-                Log.d("Catalog Product List", result.toString());
+                    }
+
+                    for (int i = 0; i < list.size(); i++) {
+                        catalogCategoryLevel catalogCategoryLevel = list.get(i);
+                        //String transactiond = catalogCategoryLevel.getCategoryId();
+                        //String currencyGiveId = catalogCategoryLevel.getCurrencyGive().getId();
+                        //String currencyTakeId = catalogCategoryLevel.getCurrencyTake().getId();
+                        System.out.println("Category Id : "  + catalogCategoryLevel.getCategoryId() + " Name :"  + catalogCategoryLevel.getName() );
+                                //"Currency Give Id " + currencyGiveId + "currency Take Id " + currencyTakeId
+                                //);
+                    }
+                    //SoapObject s_deals = (SoapObject) root.getProperty(0);
+
+
+
+                } catch (NumberFormatException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+               // } catch (IllegalArgumentException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                //} catch (IllegalAccessException e) {
+                //    // TODO Auto-generated catch block
+                //    e.printStackTrace();
+                //} catch (InstantiationException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+
+
+
+
 
             } catch (Exception e) {
                 e.printStackTrace();
