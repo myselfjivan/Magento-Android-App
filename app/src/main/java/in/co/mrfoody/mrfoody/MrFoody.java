@@ -16,7 +16,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ListView;
 
 import org.ksoap2.SoapEnvelope;
 import org.ksoap2.serialization.SoapObject;
@@ -37,6 +39,8 @@ public class MrFoody extends AppCompatActivity
     private static final String NAMESPACE = "urn:Magento";
     private static final String URL = "http://dev.mrfoody.co.in/api/v2_soap/";
     catalogCategoryLevel catalogCategoryLevel = new catalogCategoryLevel();
+    private ListView mDrawerList;
+    private ArrayAdapter<String> mAdapter;
 
     public List<catalogCategoryLevel> list = new ArrayList<catalogCategoryLevel>();
 
@@ -44,12 +48,15 @@ public class MrFoody extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         new SessionIdGenerator().execute();
+
         startService(new Intent(this, mrfoodySer.class));
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_mr_foody);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         //click = new Button()
+        mDrawerList = (ListView)findViewById(R.id.navList);
+        addDrawerItems();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -67,8 +74,8 @@ public class MrFoody extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        //NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        //navigationView.setNavigationItemSelectedListener(this);
     }
 
     @Override
@@ -85,6 +92,7 @@ public class MrFoody extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.mr_foody, menu);
+
         //menu.clear();
         //MenuItem menuItem = null;
         /*for (int i=0; i < list.size(); i++){
@@ -137,7 +145,11 @@ public class MrFoody extends AppCompatActivity
         return true;
     }
 
-
+    private void addDrawerItems() {
+        String[] osArray = { "Android", "iOS", "Windows", "OS X", "Linux" };
+        mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, osArray);
+        mDrawerList.setAdapter(mAdapter);
+    }
     public class SessionIdGenerator extends AsyncTask<String,String,String>{
 
         @Override
@@ -197,10 +209,11 @@ public class MrFoody extends AppCompatActivity
 
                     for (int i = 0; i < list.size(); i++) {
                         catalogCategoryLevel catalogCategoryLevel = list.get(i);
+                        //String[] osArray[i] = catalogCategoryLevel.getName();
                         //String transactiond = catalogCategoryLevel.getCategoryId();
                         //String currencyGiveId = catalogCategoryLevel.getCurrencyGive().getId();
                         //String currencyTakeId = catalogCategoryLevel.getCurrencyTake().getId();
-                        System.out.println("Category Id : "  + catalogCategoryLevel.getCategoryId() + " Name :"  + catalogCategoryLevel.getName() );
+                        System.out.println("Category Id : "  + catalogCategoryLevel.getCategoryId() + " Name :"  + catalogCategoryLevel.getName());
                                 //"Currency Give Id " + currencyGiveId + "currency Take Id " + currencyTakeId
                                 //);
                     }
