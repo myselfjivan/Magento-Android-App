@@ -1,9 +1,11 @@
 package in.co.mrfoody.mrfoody;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.util.Log;
@@ -41,10 +43,15 @@ public class MrFoody extends AppCompatActivity
     catalogCategoryLevel catalogCategoryLevel = new catalogCategoryLevel();
     private ListView mDrawerList;
     private ArrayAdapter<String> mAdapter;
+    public ArrayList<String> ar = new ArrayList<String>();
+    ///public String osArray[] = null;
+
+    private ActionBarDrawerToggle mDrawerToggle;
+    private DrawerLayout mDrawerLayout;
+    private String mActivityTitle;
 
     public List<catalogCategoryLevel> list = new ArrayList<catalogCategoryLevel>();
 
-    //catalogCategoryLevel.ArrayOfCatalogCategoryEntitiesNoChildrenTopCategory arrayOfCatalogCategoryEntitiesNoChildrenTopCategory = catalogCategoryLevel.new ArrayOfCatalogCategoryEntitiesNoChildrenTopCategory();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         new SessionIdGenerator().execute();
@@ -54,9 +61,9 @@ public class MrFoody extends AppCompatActivity
         setContentView(R.layout.activity_mr_foody);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        //click = new Button()
-        mDrawerList = (ListView)findViewById(R.id.navList);
-        addDrawerItems();
+
+        mActivityTitle = getTitle().toString();
+        //setupDrawer();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -92,14 +99,6 @@ public class MrFoody extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.mr_foody, menu);
-
-        //menu.clear();
-        //MenuItem menuItem = null;
-        /*for (int i=0; i < list.size(); i++){
-            assert menuItem != null;
-            menuItem.setTitle(catalogCategoryLevel.getName());
-        };
-        */
         return true;
     }
 
@@ -115,6 +114,11 @@ public class MrFoody extends AppCompatActivity
             return true;
         }
 
+        // Activate the navigation drawer toggle
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -122,34 +126,56 @@ public class MrFoody extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
-        int id = item.getItemId();
-
-        /*
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        //} else if (id == R.id.nav_share) {
-
-        //} else if (id == R.id.nav_send) {
-
-        }
-        */
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
 
     private void addDrawerItems() {
-        String[] osArray = { "Android", "iOS", "Windows", "OS X", "Linux" };
-        mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, osArray);
+        mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, ar);
         mDrawerList.setAdapter(mAdapter);
     }
+
+/*
+    private void setupDrawer() {
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
+                R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
+
+            /// Called when a drawer has settled in a completely open state.
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                getSupportActionBar().setTitle("Navigation!");
+                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+            }
+
+           // /** Called when a drawer has settled in a completely closed state.
+            public void onDrawerClosed(View view) {
+                super.onDrawerClosed(view);
+                getSupportActionBar().setTitle(mActivityTitle);
+                invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+            }
+        };
+
+        getActionBar().setDisplayHomeAsUpEnabled(true);
+        getActionBar().setHomeButtonEnabled(true);
+
+
+    }
+
+    @Override
+    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        mDrawerToggle.syncState();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        mDrawerToggle.onConfigurationChanged(newConfig);
+
+    }
+*/
     public class SessionIdGenerator extends AsyncTask<String,String,String>{
 
         @Override
@@ -194,32 +220,19 @@ public class MrFoody extends AppCompatActivity
                 SoapObject resultRes = (SoapObject)env.getResponse(); //get response
 
                 try {
-
-                    //ResponceParser.parseBusinessObject(resultRes.getProperty(0).toString(), arrayOfCatalogCategoryEntitiesNoChildrenTopCategory);
                     for (int i = 0; i < resultRes.getPropertyCount(); i++) {
                         in.co.mrfoody.mrfoody.Catalog.catalogCategoryLevel data = new catalogCategoryLevel();
                         SoapObject root = (SoapObject) resultRes.getProperty(i);
                         data.setCategoryId(root.getProperty("category_id").toString());
                         data.setName(root.getProperty("name").toString());
-                        //String category_id = root.getProperty("category_id").toString();
-                        //Log.e("vale of category id ",category_id);
                         list.add(data);
-
                     }
 
                     for (int i = 0; i < list.size(); i++) {
                         catalogCategoryLevel catalogCategoryLevel = list.get(i);
-                        //String[] osArray[i] = catalogCategoryLevel.getName();
-                        //String transactiond = catalogCategoryLevel.getCategoryId();
-                        //String currencyGiveId = catalogCategoryLevel.getCurrencyGive().getId();
-                        //String currencyTakeId = catalogCategoryLevel.getCurrencyTake().getId();
+                        ar.add(catalogCategoryLevel.getName());
                         System.out.println("Category Id : "  + catalogCategoryLevel.getCategoryId() + " Name :"  + catalogCategoryLevel.getName());
-                                //"Currency Give Id " + currencyGiveId + "currency Take Id " + currencyTakeId
-                                //);
                     }
-                    //SoapObject s_deals = (SoapObject) root.getProperty(0);
-
-
 
                 } catch (NumberFormatException e) {
                     // TODO Auto-generated catch block
@@ -234,15 +247,22 @@ public class MrFoody extends AppCompatActivity
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-
-
-
-
-
             } catch (Exception e) {
                 e.printStackTrace();
             }
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+
+            mDrawerList = (ListView)findViewById(R.id.navList);
+            addDrawerItems();
+            //setupDrawer();
+            //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            //getSupportActionBar().setHomeButtonEnabled(true);
+
+            super.onPostExecute(s);
         }
     }
 }
