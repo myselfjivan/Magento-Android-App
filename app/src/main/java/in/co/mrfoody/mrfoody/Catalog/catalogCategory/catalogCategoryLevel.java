@@ -1,4 +1,4 @@
-package in.co.mrfoody.mrfoody.Catalog;
+package in.co.mrfoody.mrfoody.Catalog.catalogCategory;
 
 /**
  * Created by om on 1/2/16.
@@ -6,11 +6,11 @@ package in.co.mrfoody.mrfoody.Catalog;
 public class catalogCategoryLevel {
 
     String category_id;
-    String	parent_id;
+    String parent_id;
     String name;
-    String	is_active;
-    String	position;
-    String	level;
+    String is_active;
+    String position;
+    String level;
 
 
     public String getCategoryId() {
@@ -59,20 +59,6 @@ public class catalogCategoryLevel {
 
     public void setLevel(String level){
         this.level = level;
-    }
-
-
-
-
-
-    public class ArrayOfCatalogCategoryEntitiesNoChildrenTopCategory {
-        int item;
-        int category_id;
-        int parent_id;
-        String name;
-        int is_active;
-        int position;
-        int level;
     }
 
 }
