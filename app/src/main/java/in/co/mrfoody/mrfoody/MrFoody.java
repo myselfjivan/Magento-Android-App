@@ -15,14 +15,19 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import org.ksoap2.SoapEnvelope;
+import org.ksoap2.SoapFault;
 import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
+import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,11 +44,12 @@ public class MrFoody extends AppCompatActivity
     private ListView mDrawerList;
     private ArrayAdapter<String> mAdapter;
     public ArrayList<String> ar = new ArrayList<String>();
+    public String METHOD = null;
+    public String USERNAME = "anotherTestingUser";
+    public String APIUSERKEY = "1f46c6a95d4949c979e929acccc254b4";
+    public static String sessionId;
     ///public String osArray[] = null;
 
-    private ActionBarDrawerToggle mDrawerToggle;
-    private DrawerLayout mDrawerLayout;
-    private String mActivityTitle;
 
     public List<catalogCategoryLevel> catalogCategoryLevels = new ArrayList<catalogCategoryLevel>();
     public List<catalogProductList> catalogProductLists = new ArrayList<catalogProductList>();
@@ -58,9 +64,6 @@ public class MrFoody extends AppCompatActivity
         setContentView(R.layout.activity_mr_foody);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-        mActivityTitle = getTitle().toString();
-        //setupDrawer();
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -78,8 +81,6 @@ public class MrFoody extends AppCompatActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
-        //NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        //navigationView.setNavigationItemSelectedListener(this);
     }
 
     @Override
@@ -111,11 +112,6 @@ public class MrFoody extends AppCompatActivity
             return true;
         }
 
-        // Activate the navigation drawer toggle
-        if (mDrawerToggle.onOptionsItemSelected(item)) {
-            return true;
-        }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -131,65 +127,32 @@ public class MrFoody extends AppCompatActivity
     private void addDrawerItems() {
         mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, ar);
         mDrawerList.setAdapter(mAdapter);
+
+        mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(MrFoody.this, "Time for an upgrade!", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
-    /*
-        private void setupDrawer() {
-            mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,
-                    R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
-
-                /// Called when a drawer has settled in a completely open state.
-                public void onDrawerOpened(View drawerView) {
-                    super.onDrawerOpened(drawerView);
-                    getSupportActionBar().setTitle("Navigation!");
-                    invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-                }
-
-               // /** Called when a drawer has settled in a completely closed state.
-                public void onDrawerClosed(View view) {
-                    super.onDrawerClosed(view);
-                    getSupportActionBar().setTitle(mActivityTitle);
-                    invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
-                }
-            };
-
-            getActionBar().setDisplayHomeAsUpEnabled(true);
-            getActionBar().setHomeButtonEnabled(true);
-
-
-        }
-
-        @Override
-        protected void onPostCreate(@Nullable Bundle savedInstanceState) {
-            super.onPostCreate(savedInstanceState);
-            // Sync the toggle state after onRestoreInstanceState has occurred.
-            mDrawerToggle.syncState();
-        }
-
-        @Override
-        public void onConfigurationChanged(Configuration newConfig) {
-            super.onConfigurationChanged(newConfig);
-            mDrawerToggle.onConfigurationChanged(newConfig);
-
-        }
-    */
     public class SessionIdGenerator extends AsyncTask<String, String, String> {
 
         @Override
         protected String doInBackground(String... params) {
             try {
-
                 SoapSerializationEnvelope env = new SoapSerializationEnvelope(
                         SoapEnvelope.VER11);
 
                 env.dotNet = false;
                 env.xsd = SoapSerializationEnvelope.XSD;
                 env.enc = SoapSerializationEnvelope.ENC;
+                METHOD = "login";
 
-                SoapObject request = new SoapObject(NAMESPACE, "login");
+                SoapObject request = new SoapObject(NAMESPACE, METHOD);
 
-                request.addProperty("username", "anotherTestingUser");
-                request.addProperty("apiKey", "1f46c6a95d4949c979e929acccc254b4");
+                request.addProperty("username", USERNAME);
+                request.addProperty("apiKey", APIUSERKEY);
 
                 env.setOutputSoapObject(request);
 
@@ -200,59 +163,129 @@ public class MrFoody extends AppCompatActivity
 
                 Log.d("sessionId", sessionIdObject.toString());
 
-                String sessionId = sessionIdObject.toString();
-                request = new SoapObject(NAMESPACE, "catalogCategoryLevel");
-                request.addProperty("sessionId", sessionId);
-                request.addProperty("parentCategory", 6);
-                //request.addProperty("storeView",);
-                //request.addProperty("attributes",);
+                sessionId = sessionIdObject.toString();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
 
-                env.setOutputSoapObject(request);
+        @Override
+        protected void onPostExecute(String s) {
+            new catalogCategoryLevelAsyncTask().execute();
+            new catalogProductListAsyncTask().execute();
+            super.onPostExecute(s);
+        }
+    }
+
+    public class catalogCategoryLevelAsyncTask extends AsyncTask<String, String, Void> {
+
+        @Override
+        protected Void doInBackground(String... params) {
+            SoapSerializationEnvelope env = new SoapSerializationEnvelope(
+                    SoapEnvelope.VER11);
+
+            env.dotNet = false;
+            env.xsd = SoapSerializationEnvelope.XSD;
+            env.enc = SoapSerializationEnvelope.ENC;
+
+            METHOD = "catalogCategoryLevel";
+            SoapObject request = new SoapObject(NAMESPACE, METHOD);
+
+            request.addProperty("username", USERNAME);
+            request.addProperty("apiKey", APIUSERKEY);
+            request.addProperty("sessionId", sessionId);
+            request.addProperty("parentCategory", 6);
+
+            HttpTransportSE androidHttpTransport = new HttpTransportSE(URL);
+
+            env.setOutputSoapObject(request);
+            try {
                 androidHttpTransport.call("", env);
-                Object catalogCategoryLevelObject = env.getResponse();
-
-                Log.d("catalog Category Level", catalogCategoryLevelObject.toString());
-
-                SoapObject ArrayOfCatalogCategoryEntitiesNoChildren = (SoapObject) env.getResponse(); //get response
-
+                Object catalogCategoryLevelObject = null;
                 try {
-                    for (int i = 0; i < ArrayOfCatalogCategoryEntitiesNoChildren.getPropertyCount(); i++) {
-                        catalogCategoryLevel data = new catalogCategoryLevel();
-                        SoapObject catalogCategoryEntityNoChildren = (SoapObject) ArrayOfCatalogCategoryEntitiesNoChildren.getProperty(i);
-                        data.setCategoryId(catalogCategoryEntityNoChildren.getProperty("category_id").toString());
-                        data.setParentId(catalogCategoryEntityNoChildren.getProperty("parent_id").toString());
-                        data.setName(catalogCategoryEntityNoChildren.getProperty("name").toString());
-                        data.setIsActive(catalogCategoryEntityNoChildren.getProperty("is_active").toString());
-                        data.setPosition(catalogCategoryEntityNoChildren.getProperty("position").toString());
-                        data.setLevel(catalogCategoryEntityNoChildren.getProperty("level").toString());
-                        catalogCategoryLevels.add(data);
+                    catalogCategoryLevelObject = env.getResponse();
+                    Log.d("catalog Category Level", catalogCategoryLevelObject.toString());
+
+                    SoapObject ArrayOfCatalogCategoryEntitiesNoChildren = null; //get response
+                    try {
+                        ArrayOfCatalogCategoryEntitiesNoChildren = (SoapObject) env.getResponse();
+
+                        try {
+                            for (int i = 0; i < ArrayOfCatalogCategoryEntitiesNoChildren.getPropertyCount(); i++) {
+                                catalogCategoryLevel data = new catalogCategoryLevel();
+                                SoapObject catalogCategoryEntityNoChildren = (SoapObject) ArrayOfCatalogCategoryEntitiesNoChildren.getProperty(i);
+                                data.setCategoryId(catalogCategoryEntityNoChildren.getProperty("category_id").toString());
+                                data.setParentId(catalogCategoryEntityNoChildren.getProperty("parent_id").toString());
+                                data.setName(catalogCategoryEntityNoChildren.getProperty("name").toString());
+                                data.setIsActive(catalogCategoryEntityNoChildren.getProperty("is_active").toString());
+                                data.setPosition(catalogCategoryEntityNoChildren.getProperty("position").toString());
+                                data.setLevel(catalogCategoryEntityNoChildren.getProperty("level").toString());
+                                catalogCategoryLevels.add(data);
+                            }
+
+                            for (int i = 0; i < catalogCategoryLevels.size(); i++) {
+                                catalogCategoryLevel catalogCategoryLevel = catalogCategoryLevels.get(i);
+                                ar.add(catalogCategoryLevel.getName());
+                                System.out.println("Category Id : " + catalogCategoryLevel.getCategoryId() +
+                                        " Name :" + catalogCategoryLevel.getName());
+                            }
+
+                        } catch (NumberFormatException e) {
+                            e.printStackTrace();
+                        }
+                    } catch (SoapFault soapFault) {
+                        soapFault.printStackTrace();
                     }
 
-                    for (int i = 0; i < catalogCategoryLevels.size(); i++) {
-                        catalogCategoryLevel catalogCategoryLevel = catalogCategoryLevels.get(i);
-                        ar.add(catalogCategoryLevel.getName());
-                        System.out.println("Category Id : " + catalogCategoryLevel.getCategoryId() +
-                                " Name :" + catalogCategoryLevel.getName());
-                    }
-
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
+                } catch (SoapFault soapFault) {
+                    soapFault.printStackTrace();
                 }
 
-                request = new SoapObject(NAMESPACE, "catalogProductList");
-                request.addProperty("sessionId", sessionId);
-                //request.addProperty("parentCategory", 6);
-                //request.addProperty("storeView",);
-                //request.addProperty("attributes",);
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (XmlPullParserException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
 
-                env.setOutputSoapObject(request);
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+
+            mDrawerList = (ListView) findViewById(R.id.navList);
+            addDrawerItems();
+        }
+    }
+
+    public class catalogProductListAsyncTask extends AsyncTask<String, String, String>{
+
+        @Override
+        protected String doInBackground(String... params) {
+            SoapSerializationEnvelope env = new SoapSerializationEnvelope(
+                    SoapEnvelope.VER11);
+
+            env.dotNet = false;
+            env.xsd = SoapSerializationEnvelope.XSD;
+            env.enc = SoapSerializationEnvelope.ENC;
+
+            METHOD = "catalogProductList";
+            SoapObject request = new SoapObject(NAMESPACE, METHOD);
+
+            request.addProperty("username", USERNAME);
+            request.addProperty("apiKey", APIUSERKEY);
+            request.addProperty("sessionId", sessionId);
+
+            HttpTransportSE androidHttpTransport = new HttpTransportSE(URL);
+            env.setOutputSoapObject(request);
+
+            try {
                 androidHttpTransport.call("", env);
                 Object catalogProductListObject = env.getResponse();
-
                 Log.d("catalog Product List", catalogProductListObject.toString());
 
                 SoapObject catalogProductEntityArray = (SoapObject) env.getResponse(); //get response
-
                 try {
                     for (int i = 0; i < catalogProductEntityArray.getPropertyCount(); i++) {
                         catalogProductList data = new catalogProductList();
@@ -262,9 +295,6 @@ public class MrFoody extends AppCompatActivity
                         data.setName(catalogProductEntity.getProperty("name").toString());
                         data.setSet(catalogProductEntity.getProperty("set").toString());
                         data.setType(catalogProductEntity.getProperty("type").toString());
-                        //SoapObject CategoryIdsArrayOfString = (SoapObject) catalogProductEntity.getProperty(i);
-                        //data.setCategoryId(CategoryIdsArrayOfString.getProperty("item").toString());
-                        //data.setCategoryId(CategoryIdsArrayOfString.getProperty().toString());
                         catalogProductLists.add(data);
                     }
 
@@ -279,11 +309,9 @@ public class MrFoody extends AppCompatActivity
                             request.addProperty("product", catalogProductList.getProduct_id());
                             env.setOutputSoapObject(request);
                             androidHttpTransport.call("", env);
-                            Object catalogProductAttributeMediaListObject = env.getResponse();
-                            //Log.d(" Media List", catalogProductAttributeMediaListObject.toString());
                             SoapObject catalogProductImageEntityArray = (SoapObject) env.getResponse();
 
-                            for(int j = 0; j< catalogProductImageEntityArray.getPropertyCount(); j++){
+                            for (int j = 0; j < catalogProductImageEntityArray.getPropertyCount(); j++) {
                                 catalogProductAttributeMediaInfo data = new catalogProductAttributeMediaInfo();
                                 SoapObject catalogProductImageEntity = (SoapObject) catalogProductImageEntityArray.getProperty(j);
                                 data.setLabel(catalogProductImageEntity.getProperty("label").toString());
@@ -292,7 +320,6 @@ public class MrFoody extends AppCompatActivity
 
                             }
 
-
                         } catch (NumberFormatException e) {
                             e.printStackTrace();
                         }
@@ -300,29 +327,19 @@ public class MrFoody extends AppCompatActivity
 
                     for (int j = 0; j < catalogProductAttributeMediaInfos.size(); j++) {
                         catalogProductAttributeMediaInfo catalogProductAttributeMediaInfo = catalogProductAttributeMediaInfos.get(j);
-                        System.out.println("Url: "+ catalogProductAttributeMediaInfo.getUrl());
+                        System.out.println("Url: " + catalogProductAttributeMediaInfo.getUrl());
                     }
 
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
                 }
-
-            } catch (Exception e) {
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (XmlPullParserException e) {
                 e.printStackTrace();
             }
+
             return null;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-
-            mDrawerList = (ListView) findViewById(R.id.navList);
-            addDrawerItems();
-            //setupDrawer();
-            //getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            //getSupportActionBar().setHomeButtonEnabled(true);
-
-            super.onPostExecute(s);
         }
     }
 }
