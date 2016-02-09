@@ -39,4 +39,12 @@ public class catalogProductInfo {
     String options_container;
     //associativeArray	additional_attributes
     String enable_googlecheckout;
+
+    public String getProduct_id() {
+        return product_id;
+    }
+
+    public void setProduct_id(String product_id) {
+        this.product_id = product_id;
+    }
 }
