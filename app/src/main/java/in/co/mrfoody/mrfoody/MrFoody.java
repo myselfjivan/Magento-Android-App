@@ -1,10 +1,12 @@
 package in.co.mrfoody.mrfoody;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -31,6 +33,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import in.co.mrfoody.mrfoody.Catalog.catalogProduct.catalogProductInfo;
 import in.co.mrfoody.mrfoody.Catalog.catalogProduct.catalogProductList;
 import in.co.mrfoody.mrfoody.Service.mrfoodySer;
 import in.co.mrfoody.mrfoody.Catalog.catalogCategory.catalogCategoryLevel;
@@ -52,6 +55,7 @@ public class MrFoody extends AppCompatActivity
 
 
     public List<catalogCategoryLevel> catalogCategoryLevels = new ArrayList<catalogCategoryLevel>();
+    public List<catalogCategoryLevel> catalogSubCategoryLevels = new ArrayList<catalogCategoryLevel>();
     public List<catalogProductList> catalogProductLists = new ArrayList<catalogProductList>();
     public List<catalogProductAttributeMediaInfo> catalogProductAttributeMediaInfos = new ArrayList<catalogProductAttributeMediaInfo>();
 
@@ -132,6 +136,12 @@ public class MrFoody extends AppCompatActivity
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Toast.makeText(MrFoody.this, "Time for an upgrade!", Toast.LENGTH_SHORT).show();
+                int category_id = position;
+                Log.d("category id clicked",""+category_id);
+                catalogCategoryLevel catalogCategoryLevel = catalogCategoryLevels.get(position);
+                Log.d("clicked categoryID",catalogCategoryLevel.getCategoryId());
+                new catalogCategoryInfoAsyncTask().execute(String.valueOf(catalogCategoryLevel.getCategoryId()));
+
             }
         });
     }
@@ -342,4 +352,66 @@ public class MrFoody extends AppCompatActivity
             return null;
         }
     }
+
+    public class catalogCategoryInfoAsyncTask extends AsyncTask<String, Integer, String >{
+
+        @Override
+        protected String doInBackground(String... params) {
+            String id = params[0];
+            Log.d("value at asynctask",id);
+            SoapSerializationEnvelope env = new SoapSerializationEnvelope(
+                    SoapEnvelope.VER11);
+
+            env.dotNet = false;
+            env.xsd = SoapSerializationEnvelope.XSD;
+            env.enc = SoapSerializationEnvelope.ENC;
+
+            METHOD = "catalogCategoryInfo";
+            SoapObject request = new SoapObject(NAMESPACE, METHOD);
+
+            request.addProperty("username", USERNAME);
+            request.addProperty("apiKey", APIUSERKEY);
+            request.addProperty("sessionId", sessionId);
+            request.addProperty("parentCategory", id);
+
+            HttpTransportSE androidHttpTransport = new HttpTransportSE(URL);
+            env.setOutputSoapObject(request);
+
+            try {
+                androidHttpTransport.call("", env);
+                Object catalogCategoryInfoObject = env.getResponse();
+                Log.d("catalog Category Info", catalogCategoryInfoObject.toString());
+                SoapObject catalogSubCategoryInfoArray = (SoapObject) env.getResponse(); //get response
+
+                for (int i = 0; i < catalogSubCategoryInfoArray.getPropertyCount(); i++) {
+                    catalogCategoryLevel data = new catalogCategoryLevel();
+                    SoapObject catalogSubCategoryArray = (SoapObject) catalogSubCategoryInfoArray.getProperty(i);
+                    data.setCategoryId(catalogSubCategoryArray.getProperty("category_id").toString());
+                    data.setName(catalogSubCategoryArray.getProperty("parent_id").toString());
+                    data.setName(catalogSubCategoryArray.getProperty("name").toString());
+                    data.setIsActive(catalogSubCategoryArray.getProperty("is_active").toString());
+                    data.setPosition(catalogSubCategoryArray.getProperty("position").toString());
+                    data.setLevel(catalogSubCategoryArray.getProperty("level").toString());
+                    catalogSubCategoryLevels.add(data);
+                }
+
+                for (int i = 0; i < catalogSubCategoryLevels.size(); i++) {
+                    catalogCategoryLevel catalogCategoryLevel = catalogSubCategoryLevels.get(i);
+                    ar.add(catalogCategoryLevel.getName());
+                    System.out.println("Category Id : " + catalogCategoryLevel.getCategoryId() +
+                            " Name :" + catalogCategoryLevel.getName());
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (XmlPullParserException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+
+        }
+
+    }
+
 }
