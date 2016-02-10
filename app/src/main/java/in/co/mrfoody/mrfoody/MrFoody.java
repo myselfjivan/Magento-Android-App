@@ -380,12 +380,12 @@ public class MrFoody extends AppCompatActivity
 
             try {
                 androidHttpTransport.call("", env);
-                Object catalogCategoryInfoObject = env.getResponse();
-                Log.d("catalog Category Level", catalogCategoryInfoObject.toString());
-                SoapObject catalogSubCategoryInfoArray = (SoapObject) env.getResponse(); //get response
-                for (int i = 0; i < catalogSubCategoryInfoArray.getPropertyCount(); i++) {
+                Object catalogCategoryLevelObject = env.getResponse();
+                Log.d("catalog Category Level", catalogCategoryLevelObject.toString());
+                SoapObject catalogSubCategoryLevelArray = (SoapObject) env.getResponse(); //get response
+                for (int i = 0; i < catalogSubCategoryLevelArray.getPropertyCount(); i++) {
                     catalogCategoryLevel data = new catalogCategoryLevel();
-                    SoapObject catalogSubCategoryArray = (SoapObject) catalogSubCategoryInfoArray.getProperty(i);
+                    SoapObject catalogSubCategoryArray = (SoapObject) catalogSubCategoryLevelArray.getProperty(i);
                     data.setCategoryId(catalogSubCategoryArray.getProperty("category_id").toString());
                     data.setName(catalogSubCategoryArray.getProperty("parent_id").toString());
                     data.setName(catalogSubCategoryArray.getProperty("name").toString());
