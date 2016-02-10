@@ -183,5 +183,60 @@ public class NetCheck extends AsyncTask<String, String, String> {
         };
         }
     }
-*/
+
+    catalogCategoryInfo{category_id=5; is_active=1; position=2; level=2; parent_id=6; all_children=5; children=
+    ; created_at = 2015 - 12 - 25 T19:
+    28:48 + 05:30;
+        updated_at = 2016 - 02 - 04 17:57:15;
+        name = Restaurants;
+        url_key = hotel2;
+        description = all the restaurants in kolhapur;
+        path = 1 / 6 / 5;
+        url_path = hotel2.html;
+        children_count = 0;
+        display_mode = PRODUCTS;
+        is_anchor = 0;
+        available_sort_by = ArrayOfString {
+        }
+        ;
+        default_sort_by = position;
+        include_in_menu = 1;
+        custom_use_parent_settings = 1;
+    }
+    */
+    /*
+    catalogCategoryInfo
+
+    {
+        category_id = 3;
+        is_active = 1;
+        position = 1;
+        level = 2;
+        parent_id = 6;
+        all_children = 3, 11, 12, 13, 8, 9, 10;
+        children = 8, 9, 11;
+        created_at = 2015 - 12 - 22 T13:
+    39:33 + 05:30;
+        updated_at = 2016 - 02 - 06 10:22:39;
+        name = Hotel;
+        url_key = hotel;
+        description = testing category;
+        meta_title = Hotels at Kolhapur|MrFoody.co.in;
+        meta_keywords = all the hotels in kolhapur;
+        path = 1 / 6 / 3;
+        url_path = hotel.html;
+        children_count = 6;
+        display_mode = PRODUCTS_AND_PAGE;
+        is_anchor = 1;
+        available_sort_by = ArrayOfString {
+    }
+        ;
+        page_layout = three_columns;
+        default_sort_by = position;
+        include_in_menu = 1;
+        custom_use_parent_settings = 0;
+        custom_apply_to_products = 0;
+    }
+    */
+
 }

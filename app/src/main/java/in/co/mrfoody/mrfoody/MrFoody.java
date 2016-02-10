@@ -55,7 +55,7 @@ public class MrFoody extends AppCompatActivity
 
 
     public List<catalogCategoryLevel> catalogCategoryLevels = new ArrayList<catalogCategoryLevel>();
-    public List<catalogCategoryLevel> catalogSubCategoryLevels = new ArrayList<catalogCategoryLevel>();
+
     public List<catalogProductList> catalogProductLists = new ArrayList<catalogProductList>();
     public List<catalogProductAttributeMediaInfo> catalogProductAttributeMediaInfos = new ArrayList<catalogProductAttributeMediaInfo>();
 
@@ -137,10 +137,10 @@ public class MrFoody extends AppCompatActivity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Toast.makeText(MrFoody.this, "Time for an upgrade!", Toast.LENGTH_SHORT).show();
                 int category_id = position;
-                Log.d("category id clicked",""+category_id);
+                Log.d("category id clicked", "" + category_id);
                 catalogCategoryLevel catalogCategoryLevel = catalogCategoryLevels.get(position);
-                Log.d("clicked categoryID",catalogCategoryLevel.getCategoryId());
-                new catalogCategoryInfoAsyncTask().execute(String.valueOf(catalogCategoryLevel.getCategoryId()));
+                Log.d("clicked categoryID", catalogCategoryLevel.getCategoryId());
+                new catalogSubCategoryLevelAsyncTask().execute(Integer.valueOf(catalogCategoryLevel.getCategoryId()));
 
             }
         });
@@ -269,7 +269,7 @@ public class MrFoody extends AppCompatActivity
         }
     }
 
-    public class catalogProductListAsyncTask extends AsyncTask<String, String, String>{
+    public class catalogProductListAsyncTask extends AsyncTask<String, String, String> {
 
         @Override
         protected String doInBackground(String... params) {
@@ -353,12 +353,13 @@ public class MrFoody extends AppCompatActivity
         }
     }
 
-    public class catalogCategoryInfoAsyncTask extends AsyncTask<String, Integer, String >{
+    public class catalogSubCategoryLevelAsyncTask extends AsyncTask<Integer, String, String> {
+        List<catalogCategoryLevel> catalogSubCategoryLevels = new ArrayList<catalogCategoryLevel>();
 
         @Override
-        protected String doInBackground(String... params) {
-            String id = params[0];
-            Log.d("value at asynctask",id);
+        protected String doInBackground(Integer... params) {
+            int id = params[0];
+            Log.d("value at asynctask", "" + id);
             SoapSerializationEnvelope env = new SoapSerializationEnvelope(
                     SoapEnvelope.VER11);
 
@@ -366,7 +367,7 @@ public class MrFoody extends AppCompatActivity
             env.xsd = SoapSerializationEnvelope.XSD;
             env.enc = SoapSerializationEnvelope.ENC;
 
-            METHOD = "catalogCategoryInfo";
+            METHOD = "catalogCategoryLevel";
             SoapObject request = new SoapObject(NAMESPACE, METHOD);
 
             request.addProperty("username", USERNAME);
@@ -380,9 +381,8 @@ public class MrFoody extends AppCompatActivity
             try {
                 androidHttpTransport.call("", env);
                 Object catalogCategoryInfoObject = env.getResponse();
-                Log.d("catalog Category Info", catalogCategoryInfoObject.toString());
+                Log.d("catalog Category Level", catalogCategoryInfoObject.toString());
                 SoapObject catalogSubCategoryInfoArray = (SoapObject) env.getResponse(); //get response
-
                 for (int i = 0; i < catalogSubCategoryInfoArray.getPropertyCount(); i++) {
                     catalogCategoryLevel data = new catalogCategoryLevel();
                     SoapObject catalogSubCategoryArray = (SoapObject) catalogSubCategoryInfoArray.getProperty(i);
@@ -394,12 +394,9 @@ public class MrFoody extends AppCompatActivity
                     data.setLevel(catalogSubCategoryArray.getProperty("level").toString());
                     catalogSubCategoryLevels.add(data);
                 }
-
-                for (int i = 0; i < catalogSubCategoryLevels.size(); i++) {
+                for(int i = 0; i<catalogSubCategoryLevels.size(); i++ ){
                     catalogCategoryLevel catalogCategoryLevel = catalogSubCategoryLevels.get(i);
-                    ar.add(catalogCategoryLevel.getName());
-                    System.out.println("Category Id : " + catalogCategoryLevel.getCategoryId() +
-                            " Name :" + catalogCategoryLevel.getName());
+                    System.out.println("category_id: " + catalogCategoryLevel.getCategoryId());
                 }
 
             } catch (IOException e) {
@@ -407,11 +404,38 @@ public class MrFoody extends AppCompatActivity
             } catch (XmlPullParserException e) {
                 e.printStackTrace();
             }
-
             return null;
-
         }
 
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+        }
+    }
+
+    public class catalogCategoryInfoAsyncTask extends AsyncTask<String, String, String>{
+        @Override
+        protected String doInBackground(String... params) {
+            SoapSerializationEnvelope env = new SoapSerializationEnvelope(
+                    SoapEnvelope.VER11);
+
+            env.dotNet = false;
+            env.xsd = SoapSerializationEnvelope.XSD;
+            env.enc = SoapSerializationEnvelope.ENC;
+
+            METHOD = "catalogCategoryLevel";
+            SoapObject request = new SoapObject(NAMESPACE, METHOD);
+
+            request.addProperty("username", USERNAME);
+            request.addProperty("apiKey", APIUSERKEY);
+            request.addProperty("sessionId", sessionId);
+            //request.addProperty("parentCategory", id);
+
+            HttpTransportSE androidHttpTransport = new HttpTransportSE(URL);
+            env.setOutputSoapObject(request);
+
+            return null;
+        }
     }
 
 }
