@@ -238,5 +238,30 @@ public class NetCheck extends AsyncTask<String, String, String> {
         custom_apply_to_products = 0;
     }
     */
+    /*
+    catalogCategoryInfo{category_id=8; is_active=1; position=1; level=3; parent_id=3; all_children=8; children=
+    ; created_at = 2015 - 12 - 25 T22:
+    15:41 + 05:30;
+        updated_at = 2016 - 02 - 06 10:34:27;
+        name = Hotel 1;
+        url_key = hotel1;
+        description = Hotel Zoraba;
+        path = 1 / 6 / 3 / 8;
+        url_path = hotel / hotel1.html;
+        children_count = 0;
+        display_mode = PRODUCTS;
+        is_anchor = 0;
+        available_sort_by = ArrayOfString {
+        }
+        ;
+        custom_design = rwd / default ;
+            page_layout = three_columns;
+            default_sort_by = position;
+            include_in_menu = 1;
+            custom_use_parent_settings = 0;
+            custom_apply_to_products = 0;
+    }
+    */
+
 
 }

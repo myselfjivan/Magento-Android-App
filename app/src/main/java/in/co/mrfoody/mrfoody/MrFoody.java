@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import in.co.mrfoody.mrfoody.Catalog.catalogCategory.catalogCategoryInfo;
 import in.co.mrfoody.mrfoody.Catalog.catalogProduct.catalogProductInfo;
 import in.co.mrfoody.mrfoody.Catalog.catalogProduct.catalogProductList;
 import in.co.mrfoody.mrfoody.Service.mrfoodySer;
@@ -45,8 +46,11 @@ public class MrFoody extends AppCompatActivity
     private static final String NAMESPACE = "urn:Magento";
     private static final String URL = "http://dev.mrfoody.co.in/api/v2_soap/";
     private ListView mDrawerList;
+    private ListView subCategoryDrawerList;
     private ArrayAdapter<String> mAdapter;
+    private ArrayAdapter<String> subCategoryAdapter;
     public ArrayList<String> ar = new ArrayList<String>();
+    public ArrayList<String> categorySubLevel = new ArrayList<String>();
     public String METHOD = null;
     public String USERNAME = "anotherTestingUser";
     public String APIUSERKEY = "1f46c6a95d4949c979e929acccc254b4";
@@ -55,9 +59,9 @@ public class MrFoody extends AppCompatActivity
 
 
     public List<catalogCategoryLevel> catalogCategoryLevels = new ArrayList<catalogCategoryLevel>();
-
     public List<catalogProductList> catalogProductLists = new ArrayList<catalogProductList>();
     public List<catalogProductAttributeMediaInfo> catalogProductAttributeMediaInfos = new ArrayList<catalogProductAttributeMediaInfo>();
+    public List<catalogCategoryLevel> catalogSubCategoryLevels = new ArrayList<catalogCategoryLevel>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,9 +141,9 @@ public class MrFoody extends AppCompatActivity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Toast.makeText(MrFoody.this, "Time for an upgrade!", Toast.LENGTH_SHORT).show();
                 int category_id = position;
-                Log.d("category id clicked", "" + category_id);
+                System.out.println("Main category id clicked"  + category_id);
                 catalogCategoryLevel catalogCategoryLevel = catalogCategoryLevels.get(position);
-                Log.d("clicked categoryID", catalogCategoryLevel.getCategoryId());
+                Log.d("Main clicked categoryID", catalogCategoryLevel.getCategoryId());
                 new catalogSubCategoryLevelAsyncTask().execute(Integer.valueOf(catalogCategoryLevel.getCategoryId()));
 
             }
@@ -354,10 +358,11 @@ public class MrFoody extends AppCompatActivity
     }
 
     public class catalogSubCategoryLevelAsyncTask extends AsyncTask<Integer, String, String> {
-        List<catalogCategoryLevel> catalogSubCategoryLevels = new ArrayList<catalogCategoryLevel>();
 
         @Override
         protected String doInBackground(Integer... params) {
+            categorySubLevel.clear();
+            catalogSubCategoryLevels.clear();
             int id = params[0];
             Log.d("value at asynctask", "" + id);
             SoapSerializationEnvelope env = new SoapSerializationEnvelope(
@@ -396,7 +401,9 @@ public class MrFoody extends AppCompatActivity
                 }
                 for(int i = 0; i<catalogSubCategoryLevels.size(); i++ ){
                     catalogCategoryLevel catalogCategoryLevel = catalogSubCategoryLevels.get(i);
-                    System.out.println("category_id: " + catalogCategoryLevel.getCategoryId());
+                    categorySubLevel.add(catalogCategoryLevel.getName());
+                    System.out.println("category_id: " + catalogCategoryLevel.getCategoryId()
+                            +"category_name" + catalogCategoryLevel.getName());
                 }
 
             } catch (IOException e) {
@@ -409,11 +416,34 @@ public class MrFoody extends AppCompatActivity
 
         @Override
         protected void onPostExecute(String s) {
+            addSubCategoryMenu();
+            //new catalogCategoryInfoAsyncTask().execute();
             super.onPostExecute(s);
         }
     }
 
+    private void addSubCategoryMenu() {
+        subCategoryAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, categorySubLevel);
+        subCategoryDrawerList = (ListView)findViewById(R.id.subCategoryMenu);
+        subCategoryDrawerList.setAdapter(subCategoryAdapter);
+        subCategoryDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(MrFoody.this, "Time for an upgrade!", Toast.LENGTH_SHORT).show();
+                int category_id = position;
+                Log.d("category id clicked", "" + category_id);
+                catalogCategoryLevel catalogCategoryLevel = catalogSubCategoryLevels.get(position);
+                Log.d("clicked categoryID", catalogCategoryLevel.getCategoryId());
+                //new catalogSubCategoryLevelAsyncTask().execute(Integer.valueOf(catalogCategoryLevel.getCategoryId()));
+
+            }
+        });
+    }
+
+
     public class catalogCategoryInfoAsyncTask extends AsyncTask<String, String, String>{
+        List<catalogCategoryInfo> catalogCategoryInfos = new ArrayList<catalogCategoryInfo>();
+
         @Override
         protected String doInBackground(String... params) {
             SoapSerializationEnvelope env = new SoapSerializationEnvelope(
@@ -423,19 +453,48 @@ public class MrFoody extends AppCompatActivity
             env.xsd = SoapSerializationEnvelope.XSD;
             env.enc = SoapSerializationEnvelope.ENC;
 
-            METHOD = "catalogCategoryLevel";
+            METHOD = "catalogCategoryInfo";
             SoapObject request = new SoapObject(NAMESPACE, METHOD);
 
             request.addProperty("username", USERNAME);
             request.addProperty("apiKey", APIUSERKEY);
             request.addProperty("sessionId", sessionId);
-            //request.addProperty("parentCategory", id);
+            request.addProperty("categoryId", 8);
 
             HttpTransportSE androidHttpTransport = new HttpTransportSE(URL);
             env.setOutputSoapObject(request);
 
+            try {
+                androidHttpTransport.call("", env);
+                Object catalogCategoryInfoObject = env.getResponse();
+                Log.d("catalog Category Info", catalogCategoryInfoObject.toString());
+                SoapObject catalogCategoryInfoArray = (SoapObject) env.getResponse(); //get response
+                for (int i = 0; i < catalogCategoryInfoArray.getPropertyCount(); i++) {
+                    catalogCategoryInfo data = new catalogCategoryInfo();
+                    //SoapObject catalogSubCategoryArray = (SoapObject) catalogCategoryInfoArray.getProperty(i);
+                    data.setCategory_id(catalogCategoryInfoArray.getProperty("category_id").toString());
+                    //data.setName(catalogCategoryInfoArray.getProperty("parent_id").toString());
+                    data.setName(catalogCategoryInfoArray.getProperty("name").toString());
+                    //data.setPosition(catalogCategoryInfoArray.getProperty("position").toString());
+                    //data.setLevel(catalogCategoryInfoArray.getProperty("level").toString());
+                    //data.setImage(catalogCategoryInfoArray.getProperty("image").toString());
+                    catalogCategoryInfos.add(data);
+
+                }
+                for(int i=0; i < catalogCategoryInfos.size(); i++){
+                    catalogCategoryInfo catalogCategoryInfo = catalogCategoryInfos.get(i);
+                    //categorySubLevel.add(catalogCategoryInfo.getName());
+                    Log.d("Infos.getName", catalogCategoryInfo.getName().toString());
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (XmlPullParserException e) {
+                e.printStackTrace();
+            }
             return null;
         }
+
     }
 
 }

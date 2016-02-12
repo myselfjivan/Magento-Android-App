@@ -16,6 +16,7 @@ public class catalogCategoryInfo {
     String name;
     String url_key;
     String description;
+    String image;
     String meta_title;
     String meta_keywords;
     String meta_description;
@@ -124,6 +125,14 @@ public class catalogCategoryInfo {
 
     public void setUrl_key(String url_key) {
         this.url_key = url_key;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 
     public String getDescription() {
