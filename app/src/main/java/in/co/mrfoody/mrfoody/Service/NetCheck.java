@@ -262,6 +262,33 @@ public class NetCheck extends AsyncTask<String, String, String> {
             custom_apply_to_products = 0;
     }
     */
+    /*
+    catalogAssignedProductArray
 
-
+    {
+        item = catalogAssignedProduct {
+        product_id = 1;
+        type = simple;
+        set = 4;
+        sku = sku;
+        position = 1;
+    }
+        ;
+        item = catalogAssignedProduct {
+        product_id = 2;
+        type = simple;
+        set = 4;
+        sku = mixveg;
+        position = 1;
+    }
+        ;
+        item = catalogAssignedProduct {
+        product_id = 3;
+        type = simple;
+        set = 4;
+        sku = Chikken TIkka;
+        position = 1;
+    } ;
+    }
+    */
 }
