@@ -84,6 +84,7 @@ public class MrFoody extends AppCompatActivity
     public List<catalogCategoryAssignedProducts> catalogCategoryAssignedProductsList = new ArrayList<catalogCategoryAssignedProducts>();
     public List<catalogProductList> catalogCategoryProductLists = new ArrayList<catalogProductList>();
     ArrayList<HeaderProperty> headerPropertyArrayList = new ArrayList<HeaderProperty>();
+    private List<String> itemList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,9 +123,11 @@ public class MrFoody extends AppCompatActivity
 
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
-        adapter.addFragment(new fragmentHotels(), "ONE");
-        //adapter.addFragment(new TwoFragment(), "TWO");
-        //adapter.addFragment(new ThreeFragment(), "THREE");
+        adapter.addFragment(new fragmentHome(), "HOME");
+        adapter.addFragment(new fragmentHotels(), "Hotels");
+        adapter.addFragment(new fragmentRestaurant(), "Restaurants");
+        adapter.addFragment(new fragmentMess(), "Mess");
+        adapter.addFragment(new fragmentCakeShop(), "Cake Shops");
         viewPager.setAdapter(adapter);
     }
 
@@ -512,6 +515,11 @@ public class MrFoody extends AppCompatActivity
                 //new catalogCategoryAssignedProductsAsyncTask().execute(Integer.valueOf(catalogCategoryLevel.getCategoryId()));
             }
         });
+    }
+
+    public void updateHomeViewTopProductsGone() {
+        //mainViewProductsList.setVisibility(View.GONE);
+
     }
 
     public class catalogSubCategoryLevelAsyncTask extends AsyncTask<Integer, String, String> {

@@ -11,13 +11,13 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="in.co.mrfoody.mrfoody.MrFoody"
     tools:showIn="@layout/app_bar_mr_foody">
-
-    <ListView
-        android:id="@+id/subCategoryMenu"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="left|start"
-        android:background="#fffff9"/>
-
+    <!---
+        <ListView
+            android:id="@+id/subCategoryMenu"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="left|start"
+            android:background="#fffff9"/>
+    -->
 
 </RelativeLayout>
