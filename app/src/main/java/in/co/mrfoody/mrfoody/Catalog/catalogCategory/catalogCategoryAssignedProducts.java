@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2016 Jivan Ghadage <jivanghadage@gmail.com>.
+ */
+
 package in.co.mrfoody.mrfoody.Catalog.catalogCategory;
 
 import android.content.Context;

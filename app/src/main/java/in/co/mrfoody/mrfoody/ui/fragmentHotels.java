@@ -1,4 +1,8 @@
-package in.co.mrfoody.mrfoody;
+/*
+ * Copyright (c) 2016 Jivan Ghadage <jivanghadage@gmail.com>.
+ */
+
+package in.co.mrfoody.mrfoody.ui;
 
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
@@ -21,12 +25,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import in.co.mrfoody.mrfoody.Catalog.catalogCategory.catalogCategoryLevel;
+import in.co.mrfoody.mrfoody.R;
 import in.co.mrfoody.mrfoody.Service.MrFoodyApplicationConfigurationKeys;
 import in.co.mrfoody.mrfoody.Service.MrFoodyApplicationConfigurationKeys;
 
 /**
  * Created by om on 19/3/16.
  */
+
 public class fragmentHotels extends Fragment {
 
     public String METHOD = null;
@@ -60,7 +66,7 @@ public class fragmentHotels extends Fragment {
         protected String doInBackground(Integer... params) {
             //categorySubLevel.clear();
             //catalogSubCategoryLevels.clear();
-            int id = 8;
+            int id = 3;
             Log.d("value at asynctask", "" + id);
             SoapSerializationEnvelope env = new SoapSerializationEnvelope(
                     SoapEnvelope.VER11);

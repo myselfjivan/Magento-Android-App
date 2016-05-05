@@ -1,10 +1,12 @@
-package in.co.mrfoody.mrfoody;
+package in.co.mrfoody.mrfoody.ui;
 
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import in.co.mrfoody.mrfoody.R;
 
 /**
  * Created by om on 20/3/16.

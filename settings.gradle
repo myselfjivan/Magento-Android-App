@@ -1,1 +1,1 @@
-include ':app'
+include ':app', ':rollbar-android-0.1.2'

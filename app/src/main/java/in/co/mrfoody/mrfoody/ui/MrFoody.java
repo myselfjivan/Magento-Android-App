@@ -1,8 +1,13 @@
-package in.co.mrfoody.mrfoody;
+/*
+ * Copyright (c) 2016 Jivan Ghadage <jivanghadage@gmail.com>.
+ */
+
+package in.co.mrfoody.mrfoody.ui;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Movie;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -12,7 +17,11 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -22,9 +31,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.apache.http.HttpEntity;
@@ -48,6 +59,7 @@ import java.util.List;
 import in.co.mrfoody.mrfoody.Catalog.catalogCategory.catalogCategoryAssignedProducts;
 import in.co.mrfoody.mrfoody.Catalog.catalogCategory.catalogCategoryInfo;
 import in.co.mrfoody.mrfoody.Catalog.catalogProduct.catalogProductList;
+import in.co.mrfoody.mrfoody.R;
 import in.co.mrfoody.mrfoody.Service.mrfoodySer;
 import in.co.mrfoody.mrfoody.Catalog.catalogCategory.catalogCategoryLevel;
 import in.co.mrfoody.mrfoody.Catalog.catalogProduct.catalogProductAttributeMediaInfo;
@@ -63,6 +75,11 @@ public class MrFoody extends AppCompatActivity
     private Toolbar toolbar;
     private TabLayout tabLayout;
     private ViewPager viewPager;
+
+    private TextView product_name;
+    private List<Movie> movieList = new ArrayList<>();
+    private RecyclerView recyclerView;
+    private productAdapter pAdapter;
 
     private ArrayAdapter<String> mainViewProductsAdapter;
     private ArrayAdapter<String> mAdapter;
@@ -96,6 +113,7 @@ public class MrFoody extends AppCompatActivity
         setContentView(R.layout.activity_mr_foody);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -210,7 +228,7 @@ public class MrFoody extends AppCompatActivity
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Toast.makeText(MrFoody.this, "Time for an upgrade!", Toast.LENGTH_SHORT).show();
                 int category_id = position;
-                System.out.println("Main category id clicked"  + category_id);
+                System.out.println("Main category id clicked" + category_id);
                 catalogCategoryLevel catalogCategoryLevel = catalogCategoryLevels.get(position);
                 Log.d("Main clicked categoryID", catalogCategoryLevel.getCategoryId());
                 new catalogSubCategoryLevelAsyncTask().execute(Integer.valueOf(catalogCategoryLevel.getCategoryId()));
@@ -219,6 +237,7 @@ public class MrFoody extends AppCompatActivity
         });
     }
 
+    /*getting session id from mrfoody.co.in store */
     public class SessionIdGenerator extends AsyncTask<String, String, String> {
 
         @Override
@@ -241,7 +260,7 @@ public class MrFoody extends AppCompatActivity
 
                 HttpTransportSE androidHttpTransport = new HttpTransportSE(MrFoodyApplicationConfigurationKeys.URL);
 
-                androidHttpTransport.call("", env,headerPropertyArrayList);
+                androidHttpTransport.call("", env, headerPropertyArrayList);
                 Object sessionIdObject = env.getResponse();
 
                 Log.d("sessionId", sessionIdObject.toString());
@@ -261,6 +280,7 @@ public class MrFoody extends AppCompatActivity
         }
     }
 
+    /*Allows you to retrieve one level of categories by a website, a store view, or a parent category.*/
     public class catalogCategoryLevelAsyncTask extends AsyncTask<String, String, Void> {
 
         @Override
@@ -284,7 +304,7 @@ public class MrFoody extends AppCompatActivity
 
             env.setOutputSoapObject(request);
             try {
-                androidHttpTransport.call("", env,headerPropertyArrayList);
+                androidHttpTransport.call("", env, headerPropertyArrayList);
                 Object catalogCategoryLevelObject = null;
                 try {
                     catalogCategoryLevelObject = env.getResponse();
@@ -342,6 +362,7 @@ public class MrFoody extends AppCompatActivity
         }
     }
 
+    /*Allows you to retrieve the list of products.*/
     public class catalogProductListAsyncTask extends AsyncTask<String, String, String> {
 
         @Override
@@ -364,7 +385,7 @@ public class MrFoody extends AppCompatActivity
             env.setOutputSoapObject(request);
 
             try {
-                androidHttpTransport.call("", env,headerPropertyArrayList);
+                androidHttpTransport.call("", env, headerPropertyArrayList);
                 Object catalogProductListObject = env.getResponse();
                 Log.d("catalog Product List", catalogProductListObject.toString());
 
@@ -392,7 +413,7 @@ public class MrFoody extends AppCompatActivity
                             request.addProperty("sessionId", MrFoodyApplicationConfigurationKeys.sessionId);
                             request.addProperty("product", catalogProductList.getProduct_id());
                             env.setOutputSoapObject(request);
-                            androidHttpTransport.call("", env,headerPropertyArrayList);
+                            androidHttpTransport.call("", env, headerPropertyArrayList);
                             SoapObject catalogProductImageEntityArray = (SoapObject) env.getResponse();
 
                             for (int j = 0; j < catalogProductImageEntityArray.getPropertyCount(); j++) {
@@ -438,6 +459,7 @@ public class MrFoody extends AppCompatActivity
             super.onPostExecute(s);
         }
     }
+
     public class updateMainViwProductList extends AsyncTask<Integer, String, Bitmap> {
 
         @Override
@@ -495,14 +517,15 @@ public class MrFoody extends AppCompatActivity
 
         @Override
         protected void onPostExecute(Bitmap bitmap) {
-            updateHomeViewTopProducts();
+            //updateHomeViewTopProducts();
+            addProductList();
             super.onPostExecute(bitmap);
         }
     }
 
-    public void updateHomeViewTopProducts(){
+    public void updateHomeViewTopProducts() {
         mainViewProductsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mainViewProductsArrayList);
-        mainViewProductsList = (ListView)findViewById(R.id.subCategoryMenu);
+        mainViewProductsList = (ListView) findViewById(R.id.subCategoryMenu);
         mainViewProductsList.setAdapter(mainViewProductsAdapter);
         mainViewProductsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -522,6 +545,7 @@ public class MrFoody extends AppCompatActivity
 
     }
 
+    /*Allows you to retrieve the list of products. Here retriving the main page product or onclick category product*/
     public class catalogSubCategoryLevelAsyncTask extends AsyncTask<Integer, String, String> {
 
         @Override
@@ -549,7 +573,7 @@ public class MrFoody extends AppCompatActivity
             env.setOutputSoapObject(request);
 
             try {
-                androidHttpTransport.call("", env,headerPropertyArrayList);
+                androidHttpTransport.call("", env, headerPropertyArrayList);
                 Object catalogCategoryLevelObject = env.getResponse();
                 Log.d("catalog Category Level", catalogCategoryLevelObject.toString());
                 SoapObject catalogSubCategoryLevelArray = (SoapObject) env.getResponse(); //get response
@@ -564,11 +588,11 @@ public class MrFoody extends AppCompatActivity
                     data.setLevel(catalogSubCategoryArray.getProperty("level").toString());
                     catalogSubCategoryLevels.add(data);
                 }
-                for(int i = 0; i<catalogSubCategoryLevels.size(); i++ ){
+                for (int i = 0; i < catalogSubCategoryLevels.size(); i++) {
                     catalogCategoryLevel catalogCategoryLevel = catalogSubCategoryLevels.get(i);
                     categorySubLevel.add(catalogCategoryLevel.getName());
                     System.out.println("category_id: " + catalogCategoryLevel.getCategoryId()
-                            +"category_name" + catalogCategoryLevel.getName());
+                            + "category_name" + catalogCategoryLevel.getName());
                 }
 
             } catch (IOException e) {
@@ -589,7 +613,7 @@ public class MrFoody extends AppCompatActivity
 
     private void addSubCategoryMenu() {
         subCategoryAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, categorySubLevel);
-        subCategoryDrawerList = (ListView)findViewById(R.id.subCategoryMenu);
+        subCategoryDrawerList = (ListView) findViewById(R.id.subCategoryMenu);
         subCategoryDrawerList.setAdapter(subCategoryAdapter);
         subCategoryDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -604,8 +628,8 @@ public class MrFoody extends AppCompatActivity
         });
     }
 
-
-    public class catalogCategoryInfoAsyncTask extends AsyncTask<String, String, String>{
+    /*Allows you to retrieve information about the required category.*/
+    public class catalogCategoryInfoAsyncTask extends AsyncTask<String, String, String> {
         List<catalogCategoryInfo> catalogCategoryInfos = new ArrayList<catalogCategoryInfo>();
 
         @Override
@@ -629,7 +653,7 @@ public class MrFoody extends AppCompatActivity
             env.setOutputSoapObject(request);
 
             try {
-                androidHttpTransport.call("", env,headerPropertyArrayList);
+                androidHttpTransport.call("", env, headerPropertyArrayList);
                 Object catalogCategoryInfoObject = env.getResponse();
                 Log.d("catalog Category Info", catalogCategoryInfoObject.toString());
                 SoapObject catalogCategoryInfoArray = (SoapObject) env.getResponse(); //get response
@@ -645,7 +669,7 @@ public class MrFoody extends AppCompatActivity
                     catalogCategoryInfos.add(data);
 
                 }
-                for(int i=0; i < catalogCategoryInfos.size(); i++){
+                for (int i = 0; i < catalogCategoryInfos.size(); i++) {
                     catalogCategoryInfo catalogCategoryInfo = catalogCategoryInfos.get(i);
                     //categorySubLevel.add(catalogCategoryInfo.getName());
                     Log.d("Infos.getName", catalogCategoryInfo.getName().toString());
@@ -690,7 +714,7 @@ public class MrFoody extends AppCompatActivity
             HttpTransportSE androidHttpTransport = new HttpTransportSE(MrFoodyApplicationConfigurationKeys.URL);
             env.setOutputSoapObject(request);
             try {
-                androidHttpTransport.call("", env,headerPropertyArrayList);
+                androidHttpTransport.call("", env, headerPropertyArrayList);
                 Object catalogCategoryAssignedProductsObject = env.getResponse();
                 Log.d("catalog Category Info", catalogCategoryAssignedProductsObject.toString());
                 SoapObject catalogCategoryAssignedProductsSoapObject = (SoapObject) env.getResponse(); //get response
@@ -706,10 +730,10 @@ public class MrFoody extends AppCompatActivity
                     catalogCategoryAssignedProductsList.add(data);
 
                 }
-                for(int i=0; i < catalogCategoryAssignedProductsList.size(); i++){
+                for (int i = 0; i < catalogCategoryAssignedProductsList.size(); i++) {
                     catalogCategoryAssignedProducts catalogCategoryAssignedProducts = catalogCategoryAssignedProductsList.get(i);
                     //categorySubLevel.add(catalogCategoryInfo.getName());
-                    Log.d("Info Get Product Id", " "+catalogCategoryAssignedProducts.getProduct_id());
+                    Log.d("Info Get Product Id", " " + catalogCategoryAssignedProducts.getProduct_id());
                 }
 
             } catch (IOException e) {
@@ -722,11 +746,11 @@ public class MrFoody extends AppCompatActivity
 
         @Override
         protected void onPostExecute(String s) {
-            System.out.println("catalogCategoryAssignedProductsList.size" +catalogCategoryAssignedProductsList.size());
-            for(int i=0; i < catalogCategoryAssignedProductsList.size(); i++) {
+            System.out.println("catalogCategoryAssignedProductsList.size" + catalogCategoryAssignedProductsList.size());
+            for (int i = 0; i < catalogCategoryAssignedProductsList.size(); i++) {
                 catalogCategoryAssignedProducts catalogCategoryAssignedProducts = catalogCategoryAssignedProductsList.get(i);
-                Log.d("all the products id", ""+ catalogCategoryAssignedProducts.getProduct_id());
-                Log.d("starting asynctask "," "+i);
+                Log.d("all the products id", "" + catalogCategoryAssignedProducts.getProduct_id());
+                Log.d("starting asynctask ", " " + i);
                 new catalogCategoryAssignedProductInfoAsyncTask().execute(catalogCategoryAssignedProducts.getProduct_id());
             }
             super.onPostExecute(s);
@@ -760,7 +784,7 @@ public class MrFoody extends AppCompatActivity
             env.setOutputSoapObject(request);
 
             try {
-                androidHttpTransport.call("", env,headerPropertyArrayList);
+                androidHttpTransport.call("", env, headerPropertyArrayList);
                 Object catalogProductListObject = env.getResponse();
                 Log.d("catalog Product List", catalogProductListObject.toString());
 
@@ -773,7 +797,7 @@ public class MrFoody extends AppCompatActivity
                     data.setSet(catalogProductEntityArray.getProperty("set").toString());
                     data.setType(catalogProductEntityArray.getProperty("type").toString());
                     catalogCategoryProductLists.add(data);
-                    System.out.println("catalogCategoryProductLists.size "+catalogCategoryProductLists.size());
+                    System.out.println("catalogCategoryProductLists.size " + catalogCategoryProductLists.size());
 /*
                         try {
                             request = new SoapObject(MrFoodyApplicationConfigurationKeys.NAMESPACE, "catalogProductAttributeMediaList");
@@ -824,6 +848,7 @@ public class MrFoody extends AppCompatActivity
     }
 
     private void getSubCategoryAssignedProductImages() {
+        /*
         subCategoryssignedProductImageAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, subCategoryAssigenedProductImages);
         subCategoryAssignedProductImagesDrawerList = (ListView)findViewById(R.id.subCategoryMenu);
         subCategoryAssignedProductImagesDrawerList.setAdapter(subCategoryssignedProductImageAdapter);
@@ -838,6 +863,59 @@ public class MrFoody extends AppCompatActivity
                 //new catalogCategoryAssignedProductsAsyncTask().execute(Integer.valueOf(catalogCategoryLevel.getCategoryId()));
             }
         });
+        */
     }
+
+    public class productAdapter extends RecyclerView.Adapter<productAdapter.MyViewHolder> {
+        private List<Movie> productList;
+
+        public class MyViewHolder extends RecyclerView.ViewHolder {
+            public TextView title, year, genre;
+
+            public MyViewHolder(View view) {
+                super(view);
+                title = (TextView) view.findViewById(R.id.title);
+            }
+        }
+
+
+        public productAdapter(List<Movie> productList) {
+            this.productList = productList;
+        }
+
+        @Override
+        public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            View itemView = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.product_list_row, parent, false);
+
+            return new MyViewHolder(itemView);
+        }
+
+        @Override
+        public void onBindViewHolder(MyViewHolder holder, int position) {
+            catalogCategoryLevel movie = catalogSubCategoryLevels.get(position);
+            holder.title.setText(movie.getName());
+        }
+
+        @Override
+        public int getItemCount() {
+            return productList.size();
+        }
+
+    }
+
+    private void addProductList() {
+        product_name = (TextView) findViewById(R.id.title);
+
+        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+
+        pAdapter = new productAdapter(movieList);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+        recyclerView.setLayoutManager(mLayoutManager);
+        recyclerView.setItemAnimator(new DefaultItemAnimator());
+        recyclerView.setAdapter(pAdapter);
+
+    }
+
 
 }
