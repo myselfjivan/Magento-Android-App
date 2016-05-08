@@ -4,6 +4,7 @@
 
 package in.co.mrfoody.mrfoody.ui;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -11,27 +12,24 @@ import android.graphics.Movie;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup;
+import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -58,12 +56,12 @@ import java.util.List;
 
 import in.co.mrfoody.mrfoody.Catalog.catalogCategory.catalogCategoryAssignedProducts;
 import in.co.mrfoody.mrfoody.Catalog.catalogCategory.catalogCategoryInfo;
-import in.co.mrfoody.mrfoody.Catalog.catalogProduct.catalogProductList;
-import in.co.mrfoody.mrfoody.R;
-import in.co.mrfoody.mrfoody.Service.mrfoodySer;
 import in.co.mrfoody.mrfoody.Catalog.catalogCategory.catalogCategoryLevel;
 import in.co.mrfoody.mrfoody.Catalog.catalogProduct.catalogProductAttributeMediaInfo;
+import in.co.mrfoody.mrfoody.Catalog.catalogProduct.catalogProductList;
+import in.co.mrfoody.mrfoody.R;
 import in.co.mrfoody.mrfoody.Service.MrFoodyApplicationConfigurationKeys;
+import in.co.mrfoody.mrfoody.Service.mrfoodySer;
 
 public class MrFoody extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -79,7 +77,7 @@ public class MrFoody extends AppCompatActivity
     private TextView product_name;
     private List<Movie> movieList = new ArrayList<>();
     private RecyclerView recyclerView;
-    private productAdapter pAdapter;
+    //private productAdapter pAdapter;
 
     private ArrayAdapter<String> mainViewProductsAdapter;
     private ArrayAdapter<String> mAdapter;
@@ -101,7 +99,13 @@ public class MrFoody extends AppCompatActivity
     public List<catalogCategoryAssignedProducts> catalogCategoryAssignedProductsList = new ArrayList<catalogCategoryAssignedProducts>();
     public List<catalogProductList> catalogCategoryProductLists = new ArrayList<catalogProductList>();
     ArrayList<HeaderProperty> headerPropertyArrayList = new ArrayList<HeaderProperty>();
+    private ProgressDialog pdia;
     private List<String> itemList;
+    NavigationDrawerActivity navigationDrawerActivity = new NavigationDrawerActivity();
+
+    private List<Person> persons;
+    private RecyclerView rv;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,6 +117,13 @@ public class MrFoody extends AppCompatActivity
         setContentView(R.layout.activity_mr_foody);
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        rv = (RecyclerView) findViewById(R.id.rv);
+
+        LinearLayoutManager llm = new LinearLayoutManager(this);
+        rv.setLayoutManager(llm);
+        rv.setHasFixedSize(true);
+
 
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
@@ -137,6 +148,18 @@ public class MrFoody extends AppCompatActivity
         tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
 
+    }
+
+    protected void initializeData() {
+        persons = new ArrayList<>();
+        persons.add(new Person("Emma Wilson", "23 years old", R.drawable.emma));
+        persons.add(new Person("Lavery Maiss", "25 years old", R.drawable.lavery));
+        persons.add(new Person("Lillie Watts", "35 years old", R.drawable.lillie));
+    }
+
+    private void initializeAdapter() {
+        RVAdapter adapter = new RVAdapter(persons);
+        rv.setAdapter(adapter);
     }
 
     private void setupViewPager(ViewPager viewPager) {
@@ -274,6 +297,7 @@ public class MrFoody extends AppCompatActivity
 
         @Override
         protected void onPostExecute(String s) {
+            //navigationDrawerActivity.new catalogCategoryLevelAsyncTask().execute();
             new catalogCategoryLevelAsyncTask().execute();
             new catalogProductListAsyncTask().execute();
             super.onPostExecute(s);
@@ -281,7 +305,9 @@ public class MrFoody extends AppCompatActivity
     }
 
     /*Allows you to retrieve one level of categories by a website, a store view, or a parent category.*/
+
     public class catalogCategoryLevelAsyncTask extends AsyncTask<String, String, Void> {
+
 
         @Override
         protected Void doInBackground(String... params) {
@@ -356,7 +382,6 @@ public class MrFoody extends AppCompatActivity
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-
             mDrawerList = (ListView) findViewById(R.id.navList);
             addDrawerItems();
         }
@@ -365,10 +390,20 @@ public class MrFoody extends AppCompatActivity
     /*Allows you to retrieve the list of products.*/
     public class catalogProductListAsyncTask extends AsyncTask<String, String, String> {
 
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pdia = new ProgressDialog(MrFoody.this);
+            pdia.setMessage("Loading...");
+            pdia.show();
+        }
+
         @Override
         protected String doInBackground(String... params) {
             SoapSerializationEnvelope env = new SoapSerializationEnvelope(
                     SoapEnvelope.VER11);
+            persons = new ArrayList<>();
 
             env.dotNet = false;
             env.xsd = SoapSerializationEnvelope.XSD;
@@ -407,6 +442,7 @@ public class MrFoody extends AppCompatActivity
                         //ar.add(catalogProductList.getProduct_id());
                         System.out.println("product Id : " + catalogProductList.getProduct_id() +
                                 " Name :" + catalogProductList.getName());
+                        persons.add(new Person(catalogProductList.getName(), catalogProductList.getName(), R.drawable.emma));
                         mainViewProductsArrayList.add(catalogProductList.getName());
                         try {
                             request = new SoapObject(MrFoodyApplicationConfigurationKeys.NAMESPACE, "catalogProductAttributeMediaList");
@@ -451,6 +487,7 @@ public class MrFoody extends AppCompatActivity
         @Override
         protected void onPostExecute(String s) {
             updateHomeViewTopProducts();
+            pdia.dismiss();
             for (int j = 0; j < catalogProductAttributeMediaInfos.size(); j++) {
                 //catalogProductAttributeMediaInfo catalogProductAttributeMediaInfo = catalogProductAttributeMediaInfos.get(j);
                 //System.out.println("Url: " + catalogProductAttributeMediaInfo.getUrl());
@@ -517,13 +554,16 @@ public class MrFoody extends AppCompatActivity
 
         @Override
         protected void onPostExecute(Bitmap bitmap) {
-            //updateHomeViewTopProducts();
-            addProductList();
+            updateHomeViewTopProducts();
+            //addProductList();
             super.onPostExecute(bitmap);
         }
     }
 
     public void updateHomeViewTopProducts() {
+        RVAdapter adapter = new RVAdapter(persons);
+        rv.setAdapter(adapter);
+        /*
         mainViewProductsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mainViewProductsArrayList);
         mainViewProductsList = (ListView) findViewById(R.id.subCategoryMenu);
         mainViewProductsList.setAdapter(mainViewProductsAdapter);
@@ -538,6 +578,7 @@ public class MrFoody extends AppCompatActivity
                 //new catalogCategoryAssignedProductsAsyncTask().execute(Integer.valueOf(catalogCategoryLevel.getCategoryId()));
             }
         });
+        */
     }
 
     public void updateHomeViewTopProductsGone() {
@@ -848,9 +889,9 @@ public class MrFoody extends AppCompatActivity
     }
 
     private void getSubCategoryAssignedProductImages() {
-        /*
+
         subCategoryssignedProductImageAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, subCategoryAssigenedProductImages);
-        subCategoryAssignedProductImagesDrawerList = (ListView)findViewById(R.id.subCategoryMenu);
+        subCategoryAssignedProductImagesDrawerList = (ListView) findViewById(R.id.subCategoryMenu);
         subCategoryAssignedProductImagesDrawerList.setAdapter(subCategoryssignedProductImageAdapter);
         subCategoryAssignedProductImagesDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -863,9 +904,9 @@ public class MrFoody extends AppCompatActivity
                 //new catalogCategoryAssignedProductsAsyncTask().execute(Integer.valueOf(catalogCategoryLevel.getCategoryId()));
             }
         });
-        */
-    }
 
+    }
+/*
     public class productAdapter extends RecyclerView.Adapter<productAdapter.MyViewHolder> {
         private List<Movie> productList;
 
@@ -916,6 +957,6 @@ public class MrFoody extends AppCompatActivity
         recyclerView.setAdapter(pAdapter);
 
     }
-
+*/
 
 }

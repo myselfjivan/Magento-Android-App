@@ -12,20 +12,6 @@
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <!---
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:text="Home"
-                android:textSize="40dp"
-                android:textStyle="bold" />
-                -->
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:scrollbars="vertical" />
 
         <ListView
             android:id="@+id/subCategoryMenu"
@@ -35,5 +21,6 @@
             android:background="#fffff9" />
 
     </RelativeLayout>
+
 
 </android.support.v7.widget.CardView>
