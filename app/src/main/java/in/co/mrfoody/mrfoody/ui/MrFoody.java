@@ -4,7 +4,6 @@
 
 package in.co.mrfoody.mrfoody.ui;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Movie;
@@ -62,10 +61,7 @@ import in.co.mrfoody.mrfoody.Service.mrfoodySer;
 public class MrFoody extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private ListView mainViewProductsList;
     private ListView mDrawerList;
-    private ListView subCategoryDrawerList;
-    private ListView subCategoryAssignedProductImagesDrawerList;
     private Toolbar toolbar;
     private TabLayout tabLayout;
     private ViewPager viewPager;
@@ -75,12 +71,8 @@ public class MrFoody extends AppCompatActivity
     private RecyclerView recyclerView;
     //private productAdapter pAdapter;
 
-    private ArrayAdapter<String> mainViewProductsAdapter;
     private ArrayAdapter<String> mAdapter;
-    private ArrayAdapter<String> subCategoryAdapter;
-    private ArrayAdapter<String> subCategoryssignedProductImageAdapter;
 
-    public ArrayList<String> mainViewProductsArrayList = new ArrayList<String>();
     public ArrayList<String> ar = new ArrayList<String>();
     public ArrayList<String> categorySubLevel = new ArrayList<String>();
     public ArrayList<String> subCategoryAssigenedProductImages = new ArrayList<String>();
@@ -95,12 +87,6 @@ public class MrFoody extends AppCompatActivity
     public List<catalogCategoryAssignedProducts> catalogCategoryAssignedProductsList = new ArrayList<catalogCategoryAssignedProducts>();
     public List<catalogProductList> catalogCategoryProductLists = new ArrayList<catalogProductList>();
     ArrayList<HeaderProperty> headerPropertyArrayList = new ArrayList<HeaderProperty>();
-    private ProgressDialog pdia;
-    private List<String> itemList;
-    NavigationDrawerActivity navigationDrawerActivity = new NavigationDrawerActivity();
-
-    private List<Person> persons;
-    private RecyclerView rv;
 
 
     @Override
