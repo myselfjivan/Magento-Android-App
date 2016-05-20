@@ -68,5 +68,6 @@ public class RVAdapter extends RecyclerView.Adapter<RVAdapter.PersonViewHolder> 
     @Override
     public int getItemCount() {
         return persons.size();
+
     }
 }

@@ -5,13 +5,15 @@
 package in.co.mrfoody.mrfoody.ui;
 
 import android.os.AsyncTask;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.support.v4.view.ViewPager;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+
+import com.squareup.picasso.Picasso;
 
 import org.ksoap2.HeaderProperty;
 import org.ksoap2.SoapEnvelope;
@@ -27,7 +29,10 @@ import java.util.List;
 import in.co.mrfoody.mrfoody.Catalog.catalogCategory.catalogCategoryLevel;
 import in.co.mrfoody.mrfoody.R;
 import in.co.mrfoody.mrfoody.Service.MrFoodyApplicationConfigurationKeys;
-import in.co.mrfoody.mrfoody.Service.MrFoodyApplicationConfigurationKeys;
+import it.gmariotti.cardslib.library.cards.material.MaterialLargeImageCard;
+import it.gmariotti.cardslib.library.internal.Card;
+import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
+import it.gmariotti.cardslib.library.view.CardListView;
 
 /**
  * Created by om on 19/3/16.
@@ -39,7 +44,12 @@ public class fragmentHotels extends Fragment {
     ArrayList<HeaderProperty> headerPropertyArrayList = new ArrayList<HeaderProperty>();
     public List<catalogCategoryLevel> catalogSubCategoryLevels = new ArrayList<catalogCategoryLevel>();
     public ArrayList<String> categorySubLevel = new ArrayList<String>();
-    private ViewPager viewPager;
+    public List<catalogCategoryLevel> catalogCategoryLevels = new ArrayList<catalogCategoryLevel>();
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+    }
 
     public fragmentHotels() {
 
@@ -119,9 +129,54 @@ public class fragmentHotels extends Fragment {
 
         @Override
         protected void onPostExecute(String s) {
-            //addSubCategoryMenu();
-            //new catalogCategoryInfoAsyncTask().execute();
+            updateView();
             super.onPostExecute(s);
         }
+    }
+
+    private void updateView() {
+        ArrayList<Card> cards = new ArrayList<Card>();
+
+        for (int i = 0; i < catalogCategoryLevels.size(); i++) {
+            catalogCategoryLevel catalogCategoryLevel = catalogSubCategoryLevels.get(i);
+            // Create a Card
+            //Card card = new Card(getContext());
+            // Create a CardHeader
+            //CardHeader header = new CardHeader(getContext());
+            // Add Header to card
+            //header.setTitle("Angry bird: " + i);
+            //card.setTitle("sample title");
+            //card.addCardHeader(header);
+            //Create a Card, set the title over the image and set the thumbnail
+            MaterialLargeImageCard card =
+                    MaterialLargeImageCard.with(getActivity())
+                            .setTextOverImage(catalogCategoryLevel.getName())
+                            .setTitle(catalogCategoryLevel.getName())
+                                    //.setSubTitle("A wonderful place")
+                            .useDrawableExternal(new MaterialLargeImageCard.DrawableExternal() {
+                                @Override
+                                public void setupInnerViewElements(ViewGroup parent, View viewImage) {
+
+                                    Picasso.with(getActivity()).setIndicatorsEnabled(true);  //only for debug tests
+                                    Picasso.with(getActivity())
+                                            .load("http://dev.mrfoody.co.in/media/catalog/category/hotel1.jpg")
+                                            .into((ImageView) viewImage);
+                                }
+                            })
+                            .build();
+            //CardThumbnail thumb = new CardThumbnail(getContext());
+            //thumb.setDrawableResource(listImages[i]);
+            //card.addCardThumbnail(thumb);
+
+            cards.add(card);
+        }
+
+        CardArrayAdapter mCardArrayAdapter = new CardArrayAdapter(getActivity(), cards);
+
+        CardListView listView = (CardListView) getActivity().findViewById(R.id.hotel_list);
+        if (listView != null) {
+            listView.setAdapter(mCardArrayAdapter);
+        }
+
     }
 }

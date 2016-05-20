@@ -7,13 +7,10 @@ package in.co.mrfoody.mrfoody.ui;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Movie;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -21,7 +18,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -36,21 +32,21 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
+import com.mikepenz.materialdrawer.Drawer;
+import com.mikepenz.materialdrawer.DrawerBuilder;
+import com.mikepenz.materialdrawer.model.DividerDrawerItem;
+import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
+import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
+
 import org.ksoap2.HeaderProperty;
 import org.ksoap2.SoapEnvelope;
-import org.ksoap2.SoapFault;
 import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -118,29 +114,40 @@ public class MrFoody extends AppCompatActivity
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        rv = (RecyclerView) findViewById(R.id.rv);
+        //rv = (RecyclerView) findViewById(R.id.rv);
 
         LinearLayoutManager llm = new LinearLayoutManager(this);
-        rv.setLayoutManager(llm);
-        rv.setHasFixedSize(true);
+        //rv.setLayoutManager(llm);
+        //rv.setHasFixedSize(true);
 
 
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
+        //DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        //ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+        //        this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        //drawer.setDrawerListener(toggle);
+        //toggle.syncState();
+        new DrawerBuilder().withActivity(this).build();
+        PrimaryDrawerItem item1 = new PrimaryDrawerItem().withName(R.string.drawer_item_home);
+        SecondaryDrawerItem item2 = (SecondaryDrawerItem) new SecondaryDrawerItem().withName(R.string.drawer_item_settings);
+        //SecondaryDrawerItem item2 = new SecondaryDrawerItem().withName(R.string.drawer_item_settings);
+        //create the drawer and remember the `Drawer` result object
+        Drawer result = new DrawerBuilder()
+                .withActivity(this)
+                .withToolbar(toolbar)
+                .addDrawerItems(
+                        item1,
+                        new DividerDrawerItem(),
+                        item2,
+                        new SecondaryDrawerItem().withName(R.string.drawer_item_settings)
+                )
+                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                    @Override
+                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                        // do something with the clicked item :D
+                        return false;
+                    }
+                })
+                .build();
 
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         setupViewPager(viewPager);
@@ -148,18 +155,6 @@ public class MrFoody extends AppCompatActivity
         tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(viewPager);
 
-    }
-
-    protected void initializeData() {
-        persons = new ArrayList<>();
-        persons.add(new Person("Emma Wilson", "23 years old", R.drawable.emma));
-        persons.add(new Person("Lavery Maiss", "25 years old", R.drawable.lavery));
-        persons.add(new Person("Lillie Watts", "35 years old", R.drawable.lillie));
-    }
-
-    private void initializeAdapter() {
-        RVAdapter adapter = new RVAdapter(persons);
-        rv.setAdapter(adapter);
     }
 
     private void setupViewPager(ViewPager viewPager) {
@@ -297,15 +292,19 @@ public class MrFoody extends AppCompatActivity
 
         @Override
         protected void onPostExecute(String s) {
-            //navigationDrawerActivity.new catalogCategoryLevelAsyncTask().execute();
-            new catalogCategoryLevelAsyncTask().execute();
-            new catalogProductListAsyncTask().execute();
+            if (MrFoodyApplicationConfigurationKeys.sessionId == null) {
+                Toast.makeText(MrFoody.this, "Unable to acquire session Id!", Toast.LENGTH_SHORT).show();
+            } else {
+                //navigationDrawerActivity.new catalogCategoryLevelAsyncTask().execute();
+                //new catalogCategoryLevelAsyncTask().execute();
+                //new catalogProductListAsyncTask().execute();
+            }
             super.onPostExecute(s);
         }
     }
 
     /*Allows you to retrieve one level of categories by a website, a store view, or a parent category.*/
-
+/*
     public class catalogCategoryLevelAsyncTask extends AsyncTask<String, String, Void> {
 
 
@@ -382,211 +381,10 @@ public class MrFoody extends AppCompatActivity
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            mDrawerList = (ListView) findViewById(R.id.navList);
-            addDrawerItems();
         }
     }
-
-    /*Allows you to retrieve the list of products.*/
-    public class catalogProductListAsyncTask extends AsyncTask<String, String, String> {
-
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            pdia = new ProgressDialog(MrFoody.this);
-            pdia.setMessage("Loading...");
-            pdia.show();
-        }
-
-        @Override
-        protected String doInBackground(String... params) {
-            SoapSerializationEnvelope env = new SoapSerializationEnvelope(
-                    SoapEnvelope.VER11);
-            persons = new ArrayList<>();
-
-            env.dotNet = false;
-            env.xsd = SoapSerializationEnvelope.XSD;
-            env.enc = SoapSerializationEnvelope.ENC;
-
-            METHOD = "catalogProductList";
-            SoapObject request = new SoapObject(MrFoodyApplicationConfigurationKeys.NAMESPACE, METHOD);
-
-            request.addProperty("username", MrFoodyApplicationConfigurationKeys.USERNAME);
-            request.addProperty("apiKey", MrFoodyApplicationConfigurationKeys.APIUSERKEY);
-            request.addProperty("sessionId", MrFoodyApplicationConfigurationKeys.sessionId);
-
-            HttpTransportSE androidHttpTransport = new HttpTransportSE(MrFoodyApplicationConfigurationKeys.URL);
-            env.setOutputSoapObject(request);
-
-            try {
-                androidHttpTransport.call("", env, headerPropertyArrayList);
-                Object catalogProductListObject = env.getResponse();
-                Log.d("catalog Product List", catalogProductListObject.toString());
-
-                SoapObject catalogProductEntityArray = (SoapObject) env.getResponse(); //get response
-                try {
-                    for (int i = 0; i < catalogProductEntityArray.getPropertyCount(); i++) {
-                        catalogProductList data = new catalogProductList();
-                        SoapObject catalogProductEntity = (SoapObject) catalogProductEntityArray.getProperty(i);
-                        data.setProduct_id(catalogProductEntity.getProperty("product_id").toString());
-                        data.setSku(catalogProductEntity.getProperty("sku").toString());
-                        data.setName(catalogProductEntity.getProperty("name").toString());
-                        data.setSet(catalogProductEntity.getProperty("set").toString());
-                        data.setType(catalogProductEntity.getProperty("type").toString());
-                        catalogProductLists.add(data);
-                    }
-
-                    for (int i = 0; i < catalogProductLists.size(); i++) {
-                        catalogProductList catalogProductList = catalogProductLists.get(i);
-                        //ar.add(catalogProductList.getProduct_id());
-                        System.out.println("product Id : " + catalogProductList.getProduct_id() +
-                                " Name :" + catalogProductList.getName());
-                        persons.add(new Person(catalogProductList.getName(), catalogProductList.getName(), R.drawable.emma));
-                        mainViewProductsArrayList.add(catalogProductList.getName());
-                        try {
-                            request = new SoapObject(MrFoodyApplicationConfigurationKeys.NAMESPACE, "catalogProductAttributeMediaList");
-                            request.addProperty("sessionId", MrFoodyApplicationConfigurationKeys.sessionId);
-                            request.addProperty("product", catalogProductList.getProduct_id());
-                            env.setOutputSoapObject(request);
-                            androidHttpTransport.call("", env, headerPropertyArrayList);
-                            SoapObject catalogProductImageEntityArray = (SoapObject) env.getResponse();
-
-                            for (int j = 0; j < catalogProductImageEntityArray.getPropertyCount(); j++) {
-                                catalogProductAttributeMediaInfo data = new catalogProductAttributeMediaInfo();
-                                SoapObject catalogProductImageEntity = (SoapObject) catalogProductImageEntityArray.getProperty(j);
-                                data.setLabel(catalogProductImageEntity.getProperty("label").toString());
-                                data.setUrl(catalogProductImageEntity.getProperty("url").toString());
-                                catalogProductAttributeMediaInfos.add(data);
-
-                            }
-
-                        } catch (NumberFormatException e) {
-                            e.printStackTrace();
-                        }
-                    }
-
-                    for (int j = 0; j < catalogProductAttributeMediaInfos.size(); j++) {
-                        catalogProductAttributeMediaInfo catalogProductAttributeMediaInfo = catalogProductAttributeMediaInfos.get(j);
-                        System.out.println("Url: " + catalogProductAttributeMediaInfo.getUrl());
-                        //new updateMainViwProductList().execute(j);
-                    }
-
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (XmlPullParserException e) {
-                e.printStackTrace();
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            updateHomeViewTopProducts();
-            pdia.dismiss();
-            for (int j = 0; j < catalogProductAttributeMediaInfos.size(); j++) {
-                //catalogProductAttributeMediaInfo catalogProductAttributeMediaInfo = catalogProductAttributeMediaInfos.get(j);
-                //System.out.println("Url: " + catalogProductAttributeMediaInfo.getUrl());
-                new updateMainViwProductList().execute(j);
-            }
-            super.onPostExecute(s);
-        }
-    }
-
-    public class updateMainViwProductList extends AsyncTask<Integer, String, Bitmap> {
-
-        @Override
-        protected Bitmap doInBackground(Integer... params) {
-            int j = params[0];
-            catalogProductAttributeMediaInfo catalogProductAttributeMediaInfo = catalogProductAttributeMediaInfos.get(j);
-            System.out.println("Url: " + catalogProductAttributeMediaInfo.getUrl());
-            String url = catalogProductAttributeMediaInfo.getUrl();
-            // initilize the default HTTP client object
-            final DefaultHttpClient client = new DefaultHttpClient();
-
-            //forming a HttoGet request
-            final HttpGet getRequest = new HttpGet(url);
-            try {
-
-                HttpResponse response = client.execute(getRequest);
-
-                //check 200 OK for success
-                final int statusCode = response.getStatusLine().getStatusCode();
-
-                if (statusCode != HttpStatus.SC_OK) {
-                    Log.w("ImageDownloader", "Error " + statusCode +
-                            " while retrieving bitmap from " + url);
-                    return null;
-
-                }
-
-                final HttpEntity entity = response.getEntity();
-                if (entity != null) {
-                    InputStream inputStream = null;
-                    try {
-                        // getting contents from the stream
-                        inputStream = entity.getContent();
-
-                        // decoding stream data back into image Bitmap that android understands
-                        final Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-
-                        return bitmap;
-                    } finally {
-                        if (inputStream != null) {
-                            inputStream.close();
-                        }
-                        entity.consumeContent();
-                    }
-                }
-            } catch (Exception e) {
-                // You Could provide a more explicit error message for IOException
-                getRequest.abort();
-                Log.e("ImageDownloader", "Something went wrong while" +
-                        " retrieving bitmap from " + url + e.toString());
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Bitmap bitmap) {
-            updateHomeViewTopProducts();
-            //addProductList();
-            super.onPostExecute(bitmap);
-        }
-    }
-
-    public void updateHomeViewTopProducts() {
-        RVAdapter adapter = new RVAdapter(persons);
-        rv.setAdapter(adapter);
-        /*
-        mainViewProductsAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mainViewProductsArrayList);
-        mainViewProductsList = (ListView) findViewById(R.id.subCategoryMenu);
-        mainViewProductsList.setAdapter(mainViewProductsAdapter);
-        mainViewProductsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                //Toast.makeText(MrFoody.this, "Time for an upgrade!", Toast.LENGTH_SHORT).show();
-                //int category_id = position;
-                //Log.d("category id clicked", "" + category_id);
-                //catalogProductAttributeMediaInfo catalogProductAttributeMediaInfo = catalogCategoryProductAttributeMediaInfos.get(position);
-                //Log.d("clicked categoryID", catalogCategoryLevel.getCategoryId());
-                //new catalogCategoryAssignedProductsAsyncTask().execute(Integer.valueOf(catalogCategoryLevel.getCategoryId()));
-            }
-        });
-        */
-    }
-
-    public void updateHomeViewTopProductsGone() {
-        //mainViewProductsList.setVisibility(View.GONE);
-
-    }
-
-    /*Allows you to retrieve the list of products. Here retriving the main page product or onclick category product*/
+*/
+    /*Allows you to retrieve the list of restaurants,hotels and other sub categories. Here retriving the main page product or onclick category product*/
     public class catalogSubCategoryLevelAsyncTask extends AsyncTask<Integer, String, String> {
 
         @Override
@@ -646,12 +444,12 @@ public class MrFoody extends AppCompatActivity
 
         @Override
         protected void onPostExecute(String s) {
-            addSubCategoryMenu();
+            //addSubCategoryMenu();
             //new catalogCategoryInfoAsyncTask().execute();
             super.onPostExecute(s);
         }
     }
-
+/*
     private void addSubCategoryMenu() {
         subCategoryAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, categorySubLevel);
         subCategoryDrawerList = (ListView) findViewById(R.id.subCategoryMenu);
@@ -668,6 +466,7 @@ public class MrFoody extends AppCompatActivity
             }
         });
     }
+*/
 
     /*Allows you to retrieve information about the required category.*/
     public class catalogCategoryInfoAsyncTask extends AsyncTask<String, String, String> {
@@ -883,11 +682,11 @@ public class MrFoody extends AppCompatActivity
         @Override
         protected void onPostExecute(Bitmap bitmap) {
             //subCategoryAssignedProductImagesDrawerList.clear();
-            getSubCategoryAssignedProductImages();
+            //getSubCategoryAssignedProductImages();
             super.onPostExecute(bitmap);
         }
     }
-
+/*
     private void getSubCategoryAssignedProductImages() {
 
         subCategoryssignedProductImageAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, subCategoryAssigenedProductImages);

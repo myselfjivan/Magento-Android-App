@@ -12,25 +12,4 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <ListView
-        android:id="@+id/navList"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:fitsSystemWindows="true"
-        app:headerLayout="@layout/nav_header_mr_foody"
-        app:menu="@menu/activity_mr_foody_drawer" />
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/rv"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-        </android.support.v7.widget.RecyclerView>
-    </LinearLayout>
-
 </android.support.v4.widget.DrawerLayout>

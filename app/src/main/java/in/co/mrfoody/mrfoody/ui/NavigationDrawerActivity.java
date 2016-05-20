@@ -4,7 +4,6 @@
 
 package in.co.mrfoody.mrfoody.ui;
 
-import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -28,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import in.co.mrfoody.mrfoody.Catalog.catalogCategory.catalogCategoryLevel;
-import in.co.mrfoody.mrfoody.Catalog.catalogProduct.catalogProductList;
 import in.co.mrfoody.mrfoody.R;
 import in.co.mrfoody.mrfoody.Service.MrFoodyApplicationConfigurationKeys;
 
@@ -126,7 +124,7 @@ public class NavigationDrawerActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            mDrawerList = (ListView) findViewById(R.id.navList);
+            //mDrawerList = (ListView) findViewById(R.id.navList);
             addDrawerItems();
 
         }
