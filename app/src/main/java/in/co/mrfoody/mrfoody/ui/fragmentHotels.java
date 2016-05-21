@@ -7,6 +7,7 @@ package in.co.mrfoody.mrfoody.ui;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,8 +32,8 @@ import in.co.mrfoody.mrfoody.R;
 import in.co.mrfoody.mrfoody.Service.MrFoodyApplicationConfigurationKeys;
 import it.gmariotti.cardslib.library.cards.material.MaterialLargeImageCard;
 import it.gmariotti.cardslib.library.internal.Card;
-import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
-import it.gmariotti.cardslib.library.view.CardListView;
+import it.gmariotti.cardslib.library.recyclerview.internal.CardArrayRecyclerViewAdapter;
+import it.gmariotti.cardslib.library.recyclerview.view.CardRecyclerView;
 
 /**
  * Created by om on 19/3/16.
@@ -164,6 +165,7 @@ public class fragmentHotels extends Fragment {
                                 }
                             })
                             .build();
+            card.setType(3);
             //CardThumbnail thumb = new CardThumbnail(getContext());
             //thumb.setDrawableResource(listImages[i]);
             //card.addCardThumbnail(thumb);
@@ -171,11 +173,16 @@ public class fragmentHotels extends Fragment {
             cards.add(card);
         }
 
-        CardArrayAdapter mCardArrayAdapter = new CardArrayAdapter(getActivity(), cards);
+        CardArrayRecyclerViewAdapter mCardArrayAdapter = new CardArrayRecyclerViewAdapter(getActivity(), cards);
 
-        CardListView listView = (CardListView) getActivity().findViewById(R.id.hotel_list);
-        if (listView != null) {
-            listView.setAdapter(mCardArrayAdapter);
+        //Staggered grid view
+        CardRecyclerView mRecyclerView = (CardRecyclerView) getActivity().findViewById(R.id.carddemo_recyclerview);
+        mRecyclerView.setHasFixedSize(false);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        //Set the empty view
+        if (mRecyclerView != null) {
+            mRecyclerView.setAdapter(mCardArrayAdapter);
         }
 
     }

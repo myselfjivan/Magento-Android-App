@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 
@@ -28,6 +29,8 @@ import in.co.mrfoody.mrfoody.Catalog.catalogProduct.catalogProductAttributeMedia
 import in.co.mrfoody.mrfoody.Catalog.catalogProduct.catalogProductList;
 import in.co.mrfoody.mrfoody.R;
 import in.co.mrfoody.mrfoody.Service.MrFoodyApplicationConfigurationKeys;
+import it.gmariotti.cardslib.library.cards.actions.BaseSupplementalAction;
+import it.gmariotti.cardslib.library.cards.actions.TextSupplementalAction;
 import it.gmariotti.cardslib.library.cards.material.MaterialLargeImageCard;
 import it.gmariotti.cardslib.library.internal.Card;
 import it.gmariotti.cardslib.library.internal.CardArrayAdapter;
@@ -185,21 +188,38 @@ public class fragmentHome extends Fragment {
         ArrayList<Card> cards = new ArrayList<Card>();
 
         for (int i = 0; i < catalogProductAttributeMediaInfos.size(); i++) {
+
+            // Set supplemental actions as text
+
             final catalogProductAttributeMediaInfo catalogProductAttributeMediaInfo = catalogProductAttributeMediaInfos.get(i);
-            catalogProductList catalogProductList = catalogProductLists.get(i);
-            // Create a Card
-            //Card card = new Card(getContext());
-            // Create a CardHeader
-            //CardHeader header = new CardHeader(getContext());
-            // Add Header to card
-            //header.setTitle("Angry bird: " + i);
-            //card.setTitle("sample title");
-            //card.addCardHeader(header);
+            final catalogProductList catalogProductList = catalogProductLists.get(i);
+
+            ArrayList<BaseSupplementalAction> actions = new ArrayList<BaseSupplementalAction>();
+
+            // Set supplemental actions
+            TextSupplementalAction t1 = new TextSupplementalAction(getActivity(), R.id.ic1);
+            t1.setOnActionClickListener(new BaseSupplementalAction.OnActionClickListener() {
+                @Override
+                public void onClick(Card card, View view) {
+                    Toast.makeText(getActivity(), " Click on Text SHARE ", Toast.LENGTH_SHORT).show();
+                }
+            });
+            actions.add(t1);
+
+            TextSupplementalAction t2 = new TextSupplementalAction(getActivity(), R.id.ic3);
+            t2.setOnActionClickListener(new BaseSupplementalAction.OnActionClickListener() {
+                @Override
+                public void onClick(Card card, View view) {
+                    Toast.makeText(getActivity(), " Product id is " + catalogProductList.getProduct_id(), Toast.LENGTH_SHORT).show();
+                }
+            });
+            actions.add(t2);
             //Create a Card, set the title over the image and set the thumbnail
             MaterialLargeImageCard card =
                     MaterialLargeImageCard.with(getActivity())
                             .setTextOverImage(catalogProductList.getName())
                             .setTitle(catalogProductList.getName())
+                            .setupSupplementalActions(R.layout.carddemo_native_material_supplemental_actions_large_icon, actions)
                                     //.setSubTitle("A wonderful place")
                             .useDrawableExternal(new MaterialLargeImageCard.DrawableExternal() {
                                 @Override
@@ -212,9 +232,6 @@ public class fragmentHome extends Fragment {
                                 }
                             })
                             .build();
-            //CardThumbnail thumb = new CardThumbnail(getContext());
-            //thumb.setDrawableResource(listImages[i]);
-            //card.addCardThumbnail(thumb);
 
             cards.add(card);
         }
