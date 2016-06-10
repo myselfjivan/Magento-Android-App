@@ -6,8 +6,13 @@
 
     <string name="action_settings">Settings</string>
 
-    <string name="drawer_item_settings">test2</string>
-    <string name="drawer_item_home">test</string>
+    <string name="drawer_item_home">Home</string>
+    <string name="drawer_item_settings">Profile</string>
+    <string name="drawer_item_orders">Profile</string>
+    <string name="drawer_item_offers">Profile</string>
+    <string name="drawer_item_chat_with_us">Profile</string>
+    <string name="drawer_item_invite">Profile</string>
+
     <string name="demo_header_basetitle">Card View Title</string>
     <string name="demo_expand_basetitle">Base Card View Title</string>
 </resources>

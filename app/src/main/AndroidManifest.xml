@@ -19,6 +19,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".ui.userActivities.login"></activity>
+        <activity android:name=".ui.userActivities.registration"></activity>
         <service android:name=".Service.mrfoodySer"></service>
     </application>
     <uses-permission android:name="android.permission.INTERNET" />

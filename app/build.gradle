@@ -32,6 +32,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.2.1'
     compile 'com.android.support:design:23.2.1'
     compile 'com.android.support:cardview-v7:23.2.1'
+    //ksoap2 parsing library
     compile 'com.google.code.ksoap2-android:ksoap2-android:3.6.0'
     android {
         useLibrary 'org.apache.http.legacy'
@@ -39,11 +40,13 @@ dependencies {
     compile('com.mikepenz:materialdrawer:5.2.2@aar') {
         transitive = true
     }
+    //leak checking library
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.3'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.3'
 
     provided 'org.glassfish:javax.annotation:10.0-b28'
 
+    //card UI libariries
     //Core
     compile 'com.github.gabrielemariotti.cards:cardslib-core:2.1.0'
 
@@ -62,5 +65,23 @@ dependencies {
     compile 'com.blunderer:materialdesignlibrary:2.0.4'
 
     compile 'com.squareup.picasso:picasso:2.5.0'
+
+    //fonts
+    compile "com.mikepenz:iconics-core:2.6.5@aar"
+    compile 'com.mikepenz:google-material-typeface:2.2.0.1.original@aar'
+    compile 'com.mikepenz:material-design-iconic-typeface:2.2.0.1@aar'
+    compile 'com.mikepenz:fontawesome-typeface:4.6.0.1@aar'
+    compile 'com.mikepenz:octicons-typeface:3.2.0.1@aar'
+    compile 'com.mikepenz:meteocons-typeface:1.1.0.1@aar'
+    compile 'com.mikepenz:community-material-typeface:1.5.54.1@aar'
+    compile 'com.mikepenz:weather-icons-typeface:2.0.10.1@aar'
+    compile 'com.mikepenz:typeicons-typeface:2.0.7.1@aar'
+    compile 'com.mikepenz:entypo-typeface:1.0.0.1@aar'
+    compile 'com.mikepenz:devicon-typeface:2.0.0.1@aar'
+    compile 'com.mikepenz:foundation-icons-typeface:3.0.0.1@aar'
+    compile 'com.mikepenz:ionicons-typeface:2.0.1.1@aar'
+
+    //login and registration screen
+    compile 'com.jakewharton:butterknife:7.0.1'
 
 }

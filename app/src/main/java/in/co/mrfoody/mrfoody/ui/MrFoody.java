@@ -102,8 +102,22 @@ public class MrFoody extends AppCompatActivity
 
 
         LinearLayoutManager llm = new LinearLayoutManager(this);
-
-        new DrawerBuilder().withActivity(this).build();
+/*
+        // Create the AccountHeader
+        AccountHeader headerResult = new AccountHeaderBuilder()
+                .withActivity(this)
+                .withHeaderBackground(R.drawable.header)
+                .addProfiles(
+                        new ProfileDrawerItem().withName("Jivan Ghadage").withEmail("jivanghadage@gmail.com").withIcon(getResources().getDrawable(R.drawable.profile))
+                )
+                .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
+                    @Override
+                    public boolean onProfileChanged(View view, IProfile profile, boolean currentProfile) {
+                        return false;
+                    }
+                })
+                .build();
+*/
         PrimaryDrawerItem item1 = new PrimaryDrawerItem().withName(R.string.drawer_item_home);
         SecondaryDrawerItem item2 = (SecondaryDrawerItem) new SecondaryDrawerItem().withName(R.string.drawer_item_settings);
         //SecondaryDrawerItem item2 = new SecondaryDrawerItem().withName(R.string.drawer_item_settings);
@@ -121,9 +135,15 @@ public class MrFoody extends AppCompatActivity
                     @Override
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
                         // do something with the clicked item :D
+                        Intent appInfo = new Intent(MrFoody.this, in.co.mrfoody.mrfoody.ui.userActivities.registration.class);
+                        startActivity(appInfo);
                         return false;
                     }
                 })
+                .build();
+
+        new DrawerBuilder()
+                .withActivity(this)
                 .build();
 
         viewPager = (ViewPager) findViewById(R.id.viewpager);
@@ -280,87 +300,6 @@ public class MrFoody extends AppCompatActivity
         }
     }
 
-    /*Allows you to retrieve one level of categories by a website, a store view, or a parent category.*/
-/*
-    public class catalogCategoryLevelAsyncTask extends AsyncTask<String, String, Void> {
-
-
-        @Override
-        protected Void doInBackground(String... params) {
-            SoapSerializationEnvelope env = new SoapSerializationEnvelope(
-                    SoapEnvelope.VER11);
-
-            env.dotNet = false;
-            env.xsd = SoapSerializationEnvelope.XSD;
-            env.enc = SoapSerializationEnvelope.ENC;
-
-            METHOD = "catalogCategoryLevel";
-            SoapObject request = new SoapObject(MrFoodyApplicationConfigurationKeys.NAMESPACE, METHOD);
-
-            request.addProperty("username", MrFoodyApplicationConfigurationKeys.USERNAME);
-            request.addProperty("apiKey", MrFoodyApplicationConfigurationKeys.APIUSERKEY);
-            request.addProperty("sessionId", MrFoodyApplicationConfigurationKeys.sessionId);
-            request.addProperty("parentCategory", 6);
-
-            HttpTransportSE androidHttpTransport = new HttpTransportSE(MrFoodyApplicationConfigurationKeys.URL);
-
-            env.setOutputSoapObject(request);
-            try {
-                androidHttpTransport.call("", env, headerPropertyArrayList);
-                Object catalogCategoryLevelObject = null;
-                try {
-                    catalogCategoryLevelObject = env.getResponse();
-                    Log.d("catalog Category Level", catalogCategoryLevelObject.toString());
-
-                    SoapObject ArrayOfCatalogCategoryEntitiesNoChildren = null; //get response
-                    try {
-                        ArrayOfCatalogCategoryEntitiesNoChildren = (SoapObject) env.getResponse();
-
-                        try {
-                            for (int i = 0; i < ArrayOfCatalogCategoryEntitiesNoChildren.getPropertyCount(); i++) {
-                                catalogCategoryLevel data = new catalogCategoryLevel();
-                                SoapObject catalogCategoryEntityNoChildren = (SoapObject) ArrayOfCatalogCategoryEntitiesNoChildren.getProperty(i);
-                                data.setCategoryId(catalogCategoryEntityNoChildren.getProperty("category_id").toString());
-                                data.setParentId(catalogCategoryEntityNoChildren.getProperty("parent_id").toString());
-                                data.setName(catalogCategoryEntityNoChildren.getProperty("name").toString());
-                                data.setIsActive(catalogCategoryEntityNoChildren.getProperty("is_active").toString());
-                                data.setPosition(catalogCategoryEntityNoChildren.getProperty("position").toString());
-                                data.setLevel(catalogCategoryEntityNoChildren.getProperty("level").toString());
-                                catalogCategoryLevels.add(data);
-                            }
-
-                            for (int i = 0; i < catalogCategoryLevels.size(); i++) {
-                                catalogCategoryLevel catalogCategoryLevel = catalogCategoryLevels.get(i);
-                                ar.add(catalogCategoryLevel.getName());
-                                System.out.println("Category Id : " + catalogCategoryLevel.getCategoryId() +
-                                        " Name :" + catalogCategoryLevel.getName());
-                            }
-
-                        } catch (NumberFormatException e) {
-                            e.printStackTrace();
-                        }
-                    } catch (SoapFault soapFault) {
-                        soapFault.printStackTrace();
-                    }
-
-                } catch (SoapFault soapFault) {
-                    soapFault.printStackTrace();
-                }
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (XmlPullParserException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-        }
-    }
-*/
     /*Allows you to retrieve the list of restaurants,hotels and other sub categories. Here retriving the main page product or onclick category product*/
     public class catalogSubCategoryLevelAsyncTask extends AsyncTask<Integer, String, String> {
 
@@ -426,24 +365,6 @@ public class MrFoody extends AppCompatActivity
             super.onPostExecute(s);
         }
     }
-/*
-    private void addSubCategoryMenu() {
-        subCategoryAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, categorySubLevel);
-        subCategoryDrawerList = (ListView) findViewById(R.id.subCategoryMenu);
-        subCategoryDrawerList.setAdapter(subCategoryAdapter);
-        subCategoryDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(MrFoody.this, "Time for an upgrade!", Toast.LENGTH_SHORT).show();
-                int category_id = position;
-                Log.d("category id clicked", "" + category_id);
-                catalogCategoryLevel catalogCategoryLevel = catalogSubCategoryLevels.get(position);
-                Log.d("clicked categoryID", catalogCategoryLevel.getCategoryId());
-                new catalogCategoryAssignedProductsAsyncTask().execute(Integer.valueOf(catalogCategoryLevel.getCategoryId()));
-            }
-        });
-    }
-*/
 
     /*Allows you to retrieve information about the required category.*/
     public class catalogCategoryInfoAsyncTask extends AsyncTask<String, String, String> {
