@@ -51,11 +51,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import in.co.mrfoody.mrfoody.Catalog.catalogCategory.catalogCategoryAssignedProducts;
-import in.co.mrfoody.mrfoody.Catalog.catalogCategory.catalogCategoryInfo;
-import in.co.mrfoody.mrfoody.Catalog.catalogCategory.catalogCategoryLevel;
-import in.co.mrfoody.mrfoody.Catalog.catalogProduct.catalogProductAttributeMediaInfo;
-import in.co.mrfoody.mrfoody.Catalog.catalogProduct.catalogProductList;
+import in.co.mrfoody.mrfoody.Library.Catalog.catalogCategory.catalogCategoryAssignedProducts;
+import in.co.mrfoody.mrfoody.Library.Catalog.catalogCategory.catalogCategoryInfo;
+import in.co.mrfoody.mrfoody.Library.Catalog.catalogCategory.catalogCategoryLevel;
+import in.co.mrfoody.mrfoody.Library.Catalog.catalogProduct.catalogProductAttributeMediaInfo;
+import in.co.mrfoody.mrfoody.Library.Catalog.catalogProduct.catalogProductList;
 import in.co.mrfoody.mrfoody.R;
 import in.co.mrfoody.mrfoody.Service.MrFoodyApplicationConfigurationKeys;
 import in.co.mrfoody.mrfoody.Service.mrfoodySer;

@@ -25,9 +25,9 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import in.co.mrfoody.mrfoody.Catalog.catalogCategory.catalogCategoryLevel;
-import in.co.mrfoody.mrfoody.Catalog.catalogProduct.catalogProductAttributeMediaInfo;
-import in.co.mrfoody.mrfoody.Catalog.catalogProduct.catalogProductList;
+import in.co.mrfoody.mrfoody.Library.Catalog.catalogCategory.catalogCategoryLevel;
+import in.co.mrfoody.mrfoody.Library.Catalog.catalogProduct.catalogProductAttributeMediaInfo;
+import in.co.mrfoody.mrfoody.Library.Catalog.catalogProduct.catalogProductList;
 import in.co.mrfoody.mrfoody.R;
 import in.co.mrfoody.mrfoody.Service.MrFoodyApplicationConfigurationKeys;
 

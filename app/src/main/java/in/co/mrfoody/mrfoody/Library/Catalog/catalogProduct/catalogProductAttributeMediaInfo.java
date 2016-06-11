@@ -2,7 +2,7 @@
  * Copyright (c) 2016 Jivan Ghadage <jivanghadage@gmail.com>.
  */
 
-package in.co.mrfoody.mrfoody.Catalog.catalogProduct;
+package in.co.mrfoody.mrfoody.Library.Catalog.catalogProduct;
 
 /**
  * Created by om on 6/2/16.

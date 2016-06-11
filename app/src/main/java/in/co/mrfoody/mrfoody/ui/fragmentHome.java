@@ -24,9 +24,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import in.co.mrfoody.mrfoody.Catalog.catalogCategory.catalogCategoryLevel;
-import in.co.mrfoody.mrfoody.Catalog.catalogProduct.catalogProductAttributeMediaInfo;
-import in.co.mrfoody.mrfoody.Catalog.catalogProduct.catalogProductList;
+import in.co.mrfoody.mrfoody.Library.Catalog.catalogCategory.catalogCategoryLevel;
+import in.co.mrfoody.mrfoody.Library.Catalog.catalogProduct.catalogProductAttributeMediaInfo;
+import in.co.mrfoody.mrfoody.Library.Catalog.catalogProduct.catalogProductList;
 import in.co.mrfoody.mrfoody.R;
 import in.co.mrfoody.mrfoody.Service.MrFoodyApplicationConfigurationKeys;
 import it.gmariotti.cardslib.library.cards.actions.BaseSupplementalAction;
@@ -129,7 +129,7 @@ public class fragmentHome extends Fragment {
                         catalogProductList catalogProductList = catalogProductLists.get(i);
                         //ar.add(catalogProductList.getProduct_id());
                         System.out.println("product Id : " + catalogProductList.getProduct_id() +
-                                " Name :" + catalogProductList.getName());
+                                " Name :" + catalogProductList.getName() + "KSU " + catalogProductList.getSku());
                         //persons.add(new Person(catalogProductList.getName(), catalogProductList.getName(), R.drawable.emma));
                         mainViewProductsArrayList.add(catalogProductList.getName());
                         try {
@@ -209,7 +209,9 @@ public class fragmentHome extends Fragment {
             t2.setOnActionClickListener(new BaseSupplementalAction.OnActionClickListener() {
                 @Override
                 public void onClick(Card card, View view) {
-                    Toast.makeText(getActivity(), " Product id is " + catalogProductList.getProduct_id(), Toast.LENGTH_SHORT).show();
+
+                    //Toast.makeText(getActivity(), " Product id is " + catalogProductList.getProduct_id(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), " Product SKU " + card.getId(), Toast.LENGTH_SHORT).show();
                 }
             });
             actions.add(t2);
@@ -242,6 +244,85 @@ public class fragmentHome extends Fragment {
             listView.setAdapter(mCardArrayAdapter);
         }
 
+    }
+
+    public class shoppingCartProductAddAsyncTask extends AsyncTask<Integer, String, String> {
+
+        @Override
+        protected String doInBackground(Integer... params) {
+            SoapSerializationEnvelope env = new SoapSerializationEnvelope(
+                    SoapEnvelope.VER11);
+
+            env.dotNet = false;
+            env.xsd = SoapSerializationEnvelope.XSD;
+            env.enc = SoapSerializationEnvelope.ENC;
+
+            METHOD = "shoppingCartProductAdd";
+            SoapObject request = new SoapObject(MrFoodyApplicationConfigurationKeys.NAMESPACE, METHOD);
+
+            request.addProperty("username", MrFoodyApplicationConfigurationKeys.USERNAME);
+            request.addProperty("apiKey", MrFoodyApplicationConfigurationKeys.APIUSERKEY);
+            request.addProperty("sessionId", MrFoodyApplicationConfigurationKeys.sessionId);
+
+            HttpTransportSE androidHttpTransport = new HttpTransportSE(MrFoodyApplicationConfigurationKeys.URL);
+            env.setOutputSoapObject(request);
+            try {
+                androidHttpTransport.call("", env, headerPropertyArrayList);
+                Object shoppingCartProductUpdateObject = env.getResponse();
+                Log.d("CartProduct Update", shoppingCartProductUpdateObject.toString());
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (XmlPullParserException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+        }
+    }
+
+
+    public class shoppingCartProductUpdateAsyncTask extends AsyncTask<String, String, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+            SoapSerializationEnvelope env = new SoapSerializationEnvelope(
+                    SoapEnvelope.VER11);
+
+            env.dotNet = false;
+            env.xsd = SoapSerializationEnvelope.XSD;
+            env.enc = SoapSerializationEnvelope.ENC;
+
+            METHOD = "shoppingCartProductUpdate";
+            SoapObject request = new SoapObject(MrFoodyApplicationConfigurationKeys.NAMESPACE, METHOD);
+
+            request.addProperty("username", MrFoodyApplicationConfigurationKeys.USERNAME);
+            request.addProperty("apiKey", MrFoodyApplicationConfigurationKeys.APIUSERKEY);
+            request.addProperty("sessionId", MrFoodyApplicationConfigurationKeys.sessionId);
+
+            HttpTransportSE androidHttpTransport = new HttpTransportSE(MrFoodyApplicationConfigurationKeys.URL);
+            env.setOutputSoapObject(request);
+            try {
+                androidHttpTransport.call("", env, headerPropertyArrayList);
+                Object shoppingCartProductUpdateObject = env.getResponse();
+                Log.d("CartProduct Update", shoppingCartProductUpdateObject.toString());
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (XmlPullParserException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+        }
     }
 
 }
