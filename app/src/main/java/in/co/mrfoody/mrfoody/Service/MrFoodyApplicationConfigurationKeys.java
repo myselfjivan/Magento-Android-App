@@ -9,4 +9,5 @@ public class MrFoodyApplicationConfigurationKeys {
     public static String USERNAME = "anotherTestingUser";
     public static String APIUSERKEY = "1f46c6a95d4949c979e929acccc254b4";
     public static String sessionId;
+    public static String cartId;
 }

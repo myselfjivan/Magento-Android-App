@@ -17,6 +17,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -103,6 +104,25 @@ public class MrFoody extends AppCompatActivity
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+
+        LinearLayoutManager llm = new LinearLayoutManager(this);
+/*
+        // Create the AccountHeader
+        AccountHeader headerResult = new AccountHeaderBuilder()
+                .withActivity(this)
+                .withHeaderBackground(R.drawable.header)
+                .addProfiles(
+                        new ProfileDrawerItem().withName("Jivan Ghadage").withEmail("jivanghadage@gmail.com").withIcon(getResources().getDrawable(R.drawable.profile))
+                )
+                .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
+                    @Override
+                    public boolean onProfileChanged(View view, IProfile profile, boolean currentProfile) {
+                        return false;
+                    }
+                })
+                .build();
+*/
+
         // Create the AccountHeader
         AccountHeader headerResult = new AccountHeaderBuilder()
                 .withActivity(this)
@@ -152,6 +172,7 @@ public class MrFoody extends AppCompatActivity
 
         //disable scrollbar :D it's ugly
         result.getRecyclerView().setVerticalScrollBarEnabled(false);
+
 
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         setupViewPager(viewPager);
@@ -299,6 +320,10 @@ public class MrFoody extends AppCompatActivity
             if (MrFoodyApplicationConfigurationKeys.sessionId == null) {
                 Toast.makeText(MrFoody.this, "Unable to acquire session Id!", Toast.LENGTH_SHORT).show();
             } else {
+                new shoppingCartCreateAsyncTask().execute();
+                //navigationDrawerActivity.new catalogCategoryLevelAsyncTask().execute();
+                //new catalogCategoryLevelAsyncTask().execute();
+                //new catalogProductListAsyncTask().execute();
             }
             super.onPostExecute(s);
         }
@@ -364,6 +389,8 @@ public class MrFoody extends AppCompatActivity
 
         @Override
         protected void onPostExecute(String s) {
+            //addSubCategoryMenu();
+            //new catalogCategoryInfoAsyncTask().execute();
             super.onPostExecute(s);
         }
     }
@@ -399,15 +426,59 @@ public class MrFoody extends AppCompatActivity
                 SoapObject catalogCategoryInfoArray = (SoapObject) env.getResponse(); //get response
                 for (int i = 0; i < catalogCategoryInfoArray.getPropertyCount(); i++) {
                     catalogCategoryInfo data = new catalogCategoryInfo();
+                    //SoapObject catalogSubCategoryArray = (SoapObject) catalogCategoryInfoArray.getProperty(i);
                     data.setCategory_id(catalogCategoryInfoArray.getProperty("category_id").toString());
+                    //data.setName(catalogCategoryInfoArray.getProperty("parent_id").toString());
                     data.setName(catalogCategoryInfoArray.getProperty("name").toString());
+                    //data.setPosition(catalogCategoryInfoArray.getProperty("position").toString());
+                    //data.setLevel(catalogCategoryInfoArray.getProperty("level").toString());
+                    //data.setImage(catalogCategoryInfoArray.getProperty("image").toString());
                     catalogCategoryInfos.add(data);
 
                 }
                 for (int i = 0; i < catalogCategoryInfos.size(); i++) {
                     catalogCategoryInfo catalogCategoryInfo = catalogCategoryInfos.get(i);
+                    //categorySubLevel.add(catalogCategoryInfo.getName());
                     Log.d("Infos.getName", catalogCategoryInfo.getName().toString());
                 }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (XmlPullParserException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+    }
+
+    /*Allows you to retrieve information about the required category.*/
+    public class shoppingCartCreateAsyncTask extends AsyncTask<String, String, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+            SoapSerializationEnvelope env = new SoapSerializationEnvelope(
+                    SoapEnvelope.VER11);
+
+            env.dotNet = false;
+            env.xsd = SoapSerializationEnvelope.XSD;
+            env.enc = SoapSerializationEnvelope.ENC;
+
+            METHOD = "shoppingCartCreate";
+            SoapObject request = new SoapObject(MrFoodyApplicationConfigurationKeys.NAMESPACE, METHOD);
+
+            request.addProperty("username", MrFoodyApplicationConfigurationKeys.USERNAME);
+            request.addProperty("apiKey", MrFoodyApplicationConfigurationKeys.APIUSERKEY);
+            request.addProperty("sessionId", MrFoodyApplicationConfigurationKeys.sessionId);
+
+            HttpTransportSE androidHttpTransport = new HttpTransportSE(MrFoodyApplicationConfigurationKeys.URL);
+            env.setOutputSoapObject(request);
+
+            try {
+                androidHttpTransport.call("", env, headerPropertyArrayList);
+                Object createdCartId = env.getResponse();
+                Log.d("created Cart Id", createdCartId.toString());
+                MrFoodyApplicationConfigurationKeys.cartId = createdCartId.toString();
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -456,7 +527,11 @@ public class MrFoody extends AppCompatActivity
                     catalogCategoryAssignedProducts data = new catalogCategoryAssignedProducts();
                     SoapObject catalogCategoryAssignedProductsSoapObject2 = (SoapObject) catalogCategoryAssignedProductsSoapObject.getProperty(i);
                     data.setProduct_id((Integer) catalogCategoryAssignedProductsSoapObject2.getProperty("product_id"));
+                    //data.setName(catalogCategoryInfoArray.getProperty("parent_id").toString());
                     data.setSku(catalogCategoryAssignedProductsSoapObject2.getProperty("sku").toString());
+                    //data.setPosition(catalogCategoryInfoArray.getProperty("position").toString());
+                    //data.setLevel(catalogCategoryInfoArray.getProperty("level").toString());
+                    //data.setImage(catalogCategoryInfoArray.getProperty("image").toString());
                     catalogCategoryAssignedProductsList.add(data);
 
                 }
@@ -528,7 +603,32 @@ public class MrFoody extends AppCompatActivity
                     data.setType(catalogProductEntityArray.getProperty("type").toString());
                     catalogCategoryProductLists.add(data);
                     System.out.println("catalogCategoryProductLists.size " + catalogCategoryProductLists.size());
+/*
+                        try {
+                            request = new SoapObject(MrFoodyApplicationConfigurationKeys.NAMESPACE, "catalogProductAttributeMediaList");
+                            request.addProperty("sessionId", MrFoodyApplicationConfigurationKeys.sessionId);
+                            request.addProperty("product", id);
+                            env.setOutputSoapObject(request);
+                            androidHttpTransport.call("", env);
+                            SoapObject catalogProductImageEntityArray = (SoapObject) env.getResponse();
+                            Log.d("Image responce",catalogProductImageEntityArray.toString());
+
+                            for (int j = 0; j < catalogProductImageEntityArray.getPropertyCount(); j++) {
+                                catalogProductAttributeMediaInfo mediaData = new catalogProductAttributeMediaInfo();
+                                SoapObject catalogProductImageEntity = (SoapObject) catalogProductImageEntityArray.getProperty(j);
+                                mediaData.setLabel(catalogProductImageEntity.getProperty("label").toString());
+                                mediaData.setUrl(catalogProductImageEntity.getProperty("url").toString());
+                                catalogCategoryProductAttributeMediaInfos.add(mediaData);
+                            }
+
+                        } catch (NumberFormatException e) {
+                            e.printStackTrace();
+                        }
+*/
                     for (int j = 0; j < catalogCategoryProductLists.size(); j++) {
+                        //subCategoryAssigenedProductImages.clear();
+                        //catalogProductAttributeMediaInfo catalogProductAttributeMediaInfo = catalogCategoryProductAttributeMediaInfos.get(j);
+                        //System.out.println("Url: " + catalogProductAttributeMediaInfo.getUrl());
                         catalogProductList catalogProductList = catalogCategoryProductLists.get(j);
                         subCategoryAssigenedProductImages.add(catalogProductList.getName());
                     }
@@ -546,6 +646,8 @@ public class MrFoody extends AppCompatActivity
 
         @Override
         protected void onPostExecute(Bitmap bitmap) {
+            //subCategoryAssignedProductImagesDrawerList.clear();
+            //getSubCategoryAssignedProductImages();
             super.onPostExecute(bitmap);
         }
     }
