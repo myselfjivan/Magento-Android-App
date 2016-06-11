@@ -6,7 +6,6 @@ package in.co.mrfoody.mrfoody.ui;
 
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Movie;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
@@ -18,8 +17,6 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -28,15 +25,19 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mikepenz.google_material_typeface_library.GoogleMaterial;
+import com.mikepenz.materialdrawer.AccountHeader;
+import com.mikepenz.materialdrawer.AccountHeaderBuilder;
 import com.mikepenz.materialdrawer.Drawer;
 import com.mikepenz.materialdrawer.DrawerBuilder;
-import com.mikepenz.materialdrawer.model.DividerDrawerItem;
 import com.mikepenz.materialdrawer.model.PrimaryDrawerItem;
-import com.mikepenz.materialdrawer.model.SecondaryDrawerItem;
+import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
+import com.mikepenz.materialdrawer.model.SectionDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
+import com.mikepenz.materialdrawer.model.interfaces.IProfile;
+import com.mikepenz.materialdrawer.model.interfaces.Nameable;
 
 import org.ksoap2.HeaderProperty;
 import org.ksoap2.SoapEnvelope;
@@ -66,11 +67,6 @@ public class MrFoody extends AppCompatActivity
     private TabLayout tabLayout;
     private ViewPager viewPager;
 
-    private TextView product_name;
-    private List<Movie> movieList = new ArrayList<>();
-    private RecyclerView recyclerView;
-    //private productAdapter pAdapter;
-
     private ArrayAdapter<String> mAdapter;
 
     public ArrayList<String> ar = new ArrayList<String>();
@@ -88,6 +84,13 @@ public class MrFoody extends AppCompatActivity
     public List<catalogProductList> catalogCategoryProductLists = new ArrayList<catalogProductList>();
     ArrayList<HeaderProperty> headerPropertyArrayList = new ArrayList<HeaderProperty>();
 
+    public Drawer result;
+    private OnFilterChangedListener onFilterChangedListener;
+
+    public void setOnFilterChangedListener(OnFilterChangedListener onFilterChangedListener) {
+        this.onFilterChangedListener = onFilterChangedListener;
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,9 +103,6 @@ public class MrFoody extends AppCompatActivity
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-
-        LinearLayoutManager llm = new LinearLayoutManager(this);
-/*
         // Create the AccountHeader
         AccountHeader headerResult = new AccountHeaderBuilder()
                 .withActivity(this)
@@ -117,34 +117,41 @@ public class MrFoody extends AppCompatActivity
                     }
                 })
                 .build();
-*/
-        PrimaryDrawerItem item1 = new PrimaryDrawerItem().withName(R.string.drawer_item_home);
-        SecondaryDrawerItem item2 = (SecondaryDrawerItem) new SecondaryDrawerItem().withName(R.string.drawer_item_settings);
-        //SecondaryDrawerItem item2 = new SecondaryDrawerItem().withName(R.string.drawer_item_settings);
+
+
         //create the drawer and remember the `Drawer` result object
-        Drawer result = new DrawerBuilder()
+        result = new DrawerBuilder()
                 .withActivity(this)
                 .withToolbar(toolbar)
+                .withHeader(R.layout.header)
+                .withAccountHeader(headerResult)
                 .addDrawerItems(
-                        item1,
-                        new DividerDrawerItem(),
-                        item2,
-                        new SecondaryDrawerItem().withName(R.string.drawer_item_settings)
+                        new PrimaryDrawerItem().withName("Profile").withIdentifier(1).withIcon(GoogleMaterial.Icon.gmd_person),
+                        new PrimaryDrawerItem().withName("Orders").withIdentifier(2).withIcon(GoogleMaterial.Icon.gmd_shopping_cart),
+                        new PrimaryDrawerItem().withName("Offers").withIdentifier(3).withIcon(GoogleMaterial.Icon.gmd_local_offer),
+                        new SectionDrawerItem().withName("Help"),
+                        new PrimaryDrawerItem().withName("Chat with us").withIdentifier(3).withIcon(GoogleMaterial.Icon.gmd_chat),
+                        new PrimaryDrawerItem().withName("Feedback").withIdentifier(3).withIcon(GoogleMaterial.Icon.gmd_feedback)
                 )
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                        // do something with the clicked item :D
-                        Intent appInfo = new Intent(MrFoody.this, in.co.mrfoody.mrfoody.ui.userActivities.registration.class);
-                        startActivity(appInfo);
+                        if (drawerItem != null) {
+                            if (drawerItem instanceof Nameable) {
+                                toolbar.setTitle(((Nameable) drawerItem).getName().getText(MrFoody.this));
+                            }
+                            if (onFilterChangedListener != null) {
+                                onFilterChangedListener.onFilterChanged(drawerItem.getIdentifier());
+                            }
+                        }
+
                         return false;
                     }
                 })
                 .build();
 
-        new DrawerBuilder()
-                .withActivity(this)
-                .build();
+        //disable scrollbar :D it's ugly
+        result.getRecyclerView().setVerticalScrollBarEnabled(false);
 
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         setupViewPager(viewPager);
@@ -292,9 +299,6 @@ public class MrFoody extends AppCompatActivity
             if (MrFoodyApplicationConfigurationKeys.sessionId == null) {
                 Toast.makeText(MrFoody.this, "Unable to acquire session Id!", Toast.LENGTH_SHORT).show();
             } else {
-                //navigationDrawerActivity.new catalogCategoryLevelAsyncTask().execute();
-                //new catalogCategoryLevelAsyncTask().execute();
-                //new catalogProductListAsyncTask().execute();
             }
             super.onPostExecute(s);
         }
@@ -360,8 +364,6 @@ public class MrFoody extends AppCompatActivity
 
         @Override
         protected void onPostExecute(String s) {
-            //addSubCategoryMenu();
-            //new catalogCategoryInfoAsyncTask().execute();
             super.onPostExecute(s);
         }
     }
@@ -397,19 +399,13 @@ public class MrFoody extends AppCompatActivity
                 SoapObject catalogCategoryInfoArray = (SoapObject) env.getResponse(); //get response
                 for (int i = 0; i < catalogCategoryInfoArray.getPropertyCount(); i++) {
                     catalogCategoryInfo data = new catalogCategoryInfo();
-                    //SoapObject catalogSubCategoryArray = (SoapObject) catalogCategoryInfoArray.getProperty(i);
                     data.setCategory_id(catalogCategoryInfoArray.getProperty("category_id").toString());
-                    //data.setName(catalogCategoryInfoArray.getProperty("parent_id").toString());
                     data.setName(catalogCategoryInfoArray.getProperty("name").toString());
-                    //data.setPosition(catalogCategoryInfoArray.getProperty("position").toString());
-                    //data.setLevel(catalogCategoryInfoArray.getProperty("level").toString());
-                    //data.setImage(catalogCategoryInfoArray.getProperty("image").toString());
                     catalogCategoryInfos.add(data);
 
                 }
                 for (int i = 0; i < catalogCategoryInfos.size(); i++) {
                     catalogCategoryInfo catalogCategoryInfo = catalogCategoryInfos.get(i);
-                    //categorySubLevel.add(catalogCategoryInfo.getName());
                     Log.d("Infos.getName", catalogCategoryInfo.getName().toString());
                 }
 
@@ -460,11 +456,7 @@ public class MrFoody extends AppCompatActivity
                     catalogCategoryAssignedProducts data = new catalogCategoryAssignedProducts();
                     SoapObject catalogCategoryAssignedProductsSoapObject2 = (SoapObject) catalogCategoryAssignedProductsSoapObject.getProperty(i);
                     data.setProduct_id((Integer) catalogCategoryAssignedProductsSoapObject2.getProperty("product_id"));
-                    //data.setName(catalogCategoryInfoArray.getProperty("parent_id").toString());
                     data.setSku(catalogCategoryAssignedProductsSoapObject2.getProperty("sku").toString());
-                    //data.setPosition(catalogCategoryInfoArray.getProperty("position").toString());
-                    //data.setLevel(catalogCategoryInfoArray.getProperty("level").toString());
-                    //data.setImage(catalogCategoryInfoArray.getProperty("image").toString());
                     catalogCategoryAssignedProductsList.add(data);
 
                 }
@@ -536,32 +528,7 @@ public class MrFoody extends AppCompatActivity
                     data.setType(catalogProductEntityArray.getProperty("type").toString());
                     catalogCategoryProductLists.add(data);
                     System.out.println("catalogCategoryProductLists.size " + catalogCategoryProductLists.size());
-/*
-                        try {
-                            request = new SoapObject(MrFoodyApplicationConfigurationKeys.NAMESPACE, "catalogProductAttributeMediaList");
-                            request.addProperty("sessionId", MrFoodyApplicationConfigurationKeys.sessionId);
-                            request.addProperty("product", id);
-                            env.setOutputSoapObject(request);
-                            androidHttpTransport.call("", env);
-                            SoapObject catalogProductImageEntityArray = (SoapObject) env.getResponse();
-                            Log.d("Image responce",catalogProductImageEntityArray.toString());
-
-                            for (int j = 0; j < catalogProductImageEntityArray.getPropertyCount(); j++) {
-                                catalogProductAttributeMediaInfo mediaData = new catalogProductAttributeMediaInfo();
-                                SoapObject catalogProductImageEntity = (SoapObject) catalogProductImageEntityArray.getProperty(j);
-                                mediaData.setLabel(catalogProductImageEntity.getProperty("label").toString());
-                                mediaData.setUrl(catalogProductImageEntity.getProperty("url").toString());
-                                catalogCategoryProductAttributeMediaInfos.add(mediaData);
-                            }
-
-                        } catch (NumberFormatException e) {
-                            e.printStackTrace();
-                        }
-*/
                     for (int j = 0; j < catalogCategoryProductLists.size(); j++) {
-                        //subCategoryAssigenedProductImages.clear();
-                        //catalogProductAttributeMediaInfo catalogProductAttributeMediaInfo = catalogCategoryProductAttributeMediaInfos.get(j);
-                        //System.out.println("Url: " + catalogProductAttributeMediaInfo.getUrl());
                         catalogProductList catalogProductList = catalogCategoryProductLists.get(j);
                         subCategoryAssigenedProductImages.add(catalogProductList.getName());
                     }
@@ -579,81 +546,12 @@ public class MrFoody extends AppCompatActivity
 
         @Override
         protected void onPostExecute(Bitmap bitmap) {
-            //subCategoryAssignedProductImagesDrawerList.clear();
-            //getSubCategoryAssignedProductImages();
             super.onPostExecute(bitmap);
         }
     }
-/*
-    private void getSubCategoryAssignedProductImages() {
 
-        subCategoryssignedProductImageAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, subCategoryAssigenedProductImages);
-        subCategoryAssignedProductImagesDrawerList = (ListView) findViewById(R.id.subCategoryMenu);
-        subCategoryAssignedProductImagesDrawerList.setAdapter(subCategoryssignedProductImageAdapter);
-        subCategoryAssignedProductImagesDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(MrFoody.this, "Time for an upgrade!", Toast.LENGTH_SHORT).show();
-                //int category_id = position;
-                //Log.d("category id clicked", "" + category_id);
-                //catalogProductAttributeMediaInfo catalogProductAttributeMediaInfo = catalogCategoryProductAttributeMediaInfos.get(position);
-                //Log.d("clicked categoryID", catalogCategoryLevel.getCategoryId());
-                //new catalogCategoryAssignedProductsAsyncTask().execute(Integer.valueOf(catalogCategoryLevel.getCategoryId()));
-            }
-        });
-
+    public interface OnFilterChangedListener {
+        public void onFilterChanged(long filter);
     }
-/*
-    public class productAdapter extends RecyclerView.Adapter<productAdapter.MyViewHolder> {
-        private List<Movie> productList;
-
-        public class MyViewHolder extends RecyclerView.ViewHolder {
-            public TextView title, year, genre;
-
-            public MyViewHolder(View view) {
-                super(view);
-                title = (TextView) view.findViewById(R.id.title);
-            }
-        }
-
-
-        public productAdapter(List<Movie> productList) {
-            this.productList = productList;
-        }
-
-        @Override
-        public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View itemView = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.product_list_row, parent, false);
-
-            return new MyViewHolder(itemView);
-        }
-
-        @Override
-        public void onBindViewHolder(MyViewHolder holder, int position) {
-            catalogCategoryLevel movie = catalogSubCategoryLevels.get(position);
-            holder.title.setText(movie.getName());
-        }
-
-        @Override
-        public int getItemCount() {
-            return productList.size();
-        }
-
-    }
-
-    private void addProductList() {
-        product_name = (TextView) findViewById(R.id.title);
-
-        recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-
-        pAdapter = new productAdapter(movieList);
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
-        recyclerView.setLayoutManager(mLayoutManager);
-        recyclerView.setItemAnimator(new DefaultItemAnimator());
-        recyclerView.setAdapter(pAdapter);
-
-    }
-*/
 
 }

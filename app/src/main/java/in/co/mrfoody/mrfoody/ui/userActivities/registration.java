@@ -1,15 +1,16 @@
 package in.co.mrfoody.mrfoody.ui.userActivities;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.ksoap2.HeaderProperty;
 import org.ksoap2.SoapEnvelope;
@@ -29,7 +30,7 @@ import in.co.mrfoody.mrfoody.Service.MrFoodyApplicationConfigurationKeys;
 /**
  * Created by om on 10/6/16.
  */
-public class registration extends Activity{
+public class registration extends AppCompatActivity{
 
     private static final String TAG = "LoginActivity";
     private static final int REQUEST_SIGNUP = 0;
@@ -58,7 +59,9 @@ public class registration extends Activity{
             @Override
             public void onClick(View v) {
                 // Finish the registration screen and return to the Login activity
-                finish();
+                Intent intent = new Intent(getApplicationContext(), in.co.mrfoody.mrfoody.ui.userActivities.login.class);
+                startActivityForResult(intent, REQUEST_SIGNUP);
+                //finish();
             }
         });
     }
@@ -125,6 +128,7 @@ public class registration extends Activity{
                 androidHttpTransport.call("", env, headerPropertyArrayList);
                 Object userId = env.getResponse();
                 Log.d("", userId.toString());
+                Toast.makeText(registration.this, "Registration Responce:"+ userId.toString(), Toast.LENGTH_SHORT).show();
 
             } catch (IOException e) {
                 e.printStackTrace();

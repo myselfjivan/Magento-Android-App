@@ -186,7 +186,6 @@ public class fragmentHome extends Fragment {
 
     private void updateView() {
         ArrayList<Card> cards = new ArrayList<Card>();
-
         for (int i = 0; i < catalogProductAttributeMediaInfos.size(); i++) {
 
             // Set supplemental actions as text
@@ -244,4 +243,5 @@ public class fragmentHome extends Fragment {
         }
 
     }
+
 }
