@@ -15,10 +15,14 @@ import com.squareup.picasso.Picasso;
 
 import org.ksoap2.HeaderProperty;
 import org.ksoap2.SoapEnvelope;
+import org.ksoap2.serialization.Marshal;
+import org.ksoap2.serialization.PropertyInfo;
 import org.ksoap2.serialization.SoapObject;
 import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
+import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,6 +33,7 @@ import in.co.mrfoody.mrfoody.Library.Catalog.catalogProduct.catalogProductAttrib
 import in.co.mrfoody.mrfoody.Library.Catalog.catalogProduct.catalogProductList;
 import in.co.mrfoody.mrfoody.R;
 import in.co.mrfoody.mrfoody.Service.MrFoodyApplicationConfigurationKeys;
+import in.co.mrfoody.mrfoody.Service.ksoap2Alternative;
 import it.gmariotti.cardslib.library.cards.actions.BaseSupplementalAction;
 import it.gmariotti.cardslib.library.cards.actions.TextSupplementalAction;
 import it.gmariotti.cardslib.library.cards.material.MaterialLargeImageCard;
@@ -129,7 +134,7 @@ public class fragmentHome extends Fragment {
                         catalogProductList catalogProductList = catalogProductLists.get(i);
                         //ar.add(catalogProductList.getProduct_id());
                         System.out.println("product Id : " + catalogProductList.getProduct_id() +
-                                " Name :" + catalogProductList.getName() + "KSU " + catalogProductList.getSku());
+                                " Name :" + catalogProductList.getName() + "SKU " + catalogProductList.getSku());
                         //persons.add(new Person(catalogProductList.getName(), catalogProductList.getName(), R.drawable.emma));
                         mainViewProductsArrayList.add(catalogProductList.getName());
                         try {
@@ -187,9 +192,7 @@ public class fragmentHome extends Fragment {
     private void updateView() {
         ArrayList<Card> cards = new ArrayList<Card>();
         for (int i = 0; i < catalogProductAttributeMediaInfos.size(); i++) {
-
-            // Set supplemental actions as text
-
+            final SoapObject productDetails = new SoapObject(MrFoodyApplicationConfigurationKeys.NAMESPACE, "shoppingCartProductEntity");
             final catalogProductAttributeMediaInfo catalogProductAttributeMediaInfo = catalogProductAttributeMediaInfos.get(i);
             final catalogProductList catalogProductList = catalogProductLists.get(i);
 
@@ -209,9 +212,25 @@ public class fragmentHome extends Fragment {
             t2.setOnActionClickListener(new BaseSupplementalAction.OnActionClickListener() {
                 @Override
                 public void onClick(Card card, View view) {
+                    double qty = 2.0;
+                    productDetails.addProperty("product_id", catalogProductList.getProduct_id());
+                    productDetails.addProperty("sku", catalogProductList.getSku());
+                    productDetails.addProperty("qty", qty);
+                    productDetails.addProperty("options", null);
+                    productDetails.addProperty("bundle_option", null);
+                    productDetails.addProperty("bundle_option_qty", null);
+                    productDetails.addProperty("link", null);
 
-                    //Toast.makeText(getActivity(), " Product id is " + catalogProductList.getProduct_id(), Toast.LENGTH_SHORT).show();
-                    Toast.makeText(getActivity(), " Product SKU " + card.getId(), Toast.LENGTH_SHORT).show();
+
+                    new ksoap2Alternative(getContext()).execute("shoppingCartProductAdd",
+                            "username | "+MrFoodyApplicationConfigurationKeys.USERNAME,
+                            "apiKey |"+MrFoodyApplicationConfigurationKeys.APIUSERKEY,
+                            "quoteId|"+MrFoodyApplicationConfigurationKeys.cartId,
+                            "productsData |"+productDetails,
+                            "sessionId|"+MrFoodyApplicationConfigurationKeys.sessionId);
+
+                    //new shoppingCartProductAddAsyncTask().execute(productDetails);
+                    Toast.makeText(getActivity(), " id " + catalogProductList.getProduct_id() + "sku" + catalogProductList.getSku(), Toast.LENGTH_SHORT).show();
                 }
             });
             actions.add(t2);
@@ -246,10 +265,11 @@ public class fragmentHome extends Fragment {
 
     }
 
-    public class shoppingCartProductAddAsyncTask extends AsyncTask<Integer, String, String> {
+    public class shoppingCartProductAddAsyncTask extends AsyncTask<SoapObject, String, String> {
 
         @Override
-        protected String doInBackground(Integer... params) {
+        protected String doInBackground(SoapObject... params) {
+            SoapObject productDetails = params[0];
             SoapSerializationEnvelope env = new SoapSerializationEnvelope(
                     SoapEnvelope.VER11);
 
@@ -262,14 +282,17 @@ public class fragmentHome extends Fragment {
 
             request.addProperty("username", MrFoodyApplicationConfigurationKeys.USERNAME);
             request.addProperty("apiKey", MrFoodyApplicationConfigurationKeys.APIUSERKEY);
+            request.addProperty("quoteId", MrFoodyApplicationConfigurationKeys.cartId);
+            request.addProperty("productsData", productDetails);
             request.addProperty("sessionId", MrFoodyApplicationConfigurationKeys.sessionId);
 
             HttpTransportSE androidHttpTransport = new HttpTransportSE(MrFoodyApplicationConfigurationKeys.URL);
+
             env.setOutputSoapObject(request);
             try {
                 androidHttpTransport.call("", env, headerPropertyArrayList);
                 Object shoppingCartProductUpdateObject = env.getResponse();
-                Log.d("CartProduct Update", shoppingCartProductUpdateObject.toString());
+                Log.v("CartProduct Update", shoppingCartProductUpdateObject.toString());
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -323,6 +346,28 @@ public class fragmentHome extends Fragment {
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
         }
+    }
+
+    public class MarshalDouble implements Marshal {
+
+
+        public Object readInstance(XmlPullParser parser, String namespace, String name,
+                                   PropertyInfo expected) throws IOException, XmlPullParserException {
+
+            return Double.parseDouble(parser.nextText());
+        }
+
+
+        public void register(SoapSerializationEnvelope cm) {
+            cm.addMapping(cm.xsd, "double", Double.class, this);
+
+        }
+
+
+        public void writeInstance(XmlSerializer writer, Object obj) throws IOException {
+            writer.text(obj.toString());
+        }
+
     }
 
 }

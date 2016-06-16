@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -23,9 +24,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
@@ -38,7 +37,6 @@ import com.mikepenz.materialdrawer.model.ProfileDrawerItem;
 import com.mikepenz.materialdrawer.model.SectionDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
-import com.mikepenz.materialdrawer.model.interfaces.Nameable;
 
 import org.ksoap2.HeaderProperty;
 import org.ksoap2.SoapEnvelope;
@@ -59,14 +57,17 @@ import in.co.mrfoody.mrfoody.Library.Catalog.catalogProduct.catalogProductList;
 import in.co.mrfoody.mrfoody.R;
 import in.co.mrfoody.mrfoody.Service.MrFoodyApplicationConfigurationKeys;
 import in.co.mrfoody.mrfoody.Service.mrfoodySer;
+import in.co.mrfoody.mrfoody.ui.userActivities.cartInfo;
+import in.co.mrfoody.mrfoody.ui.userActivities.newRegistration;
+import in.co.mrfoody.mrfoody.ui.userActivities.orders;
 
 public class MrFoody extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
-    private ListView mDrawerList;
     private Toolbar toolbar;
     private TabLayout tabLayout;
     private ViewPager viewPager;
+    private FloatingActionButton fab;
 
     private ArrayAdapter<String> mAdapter;
 
@@ -87,6 +88,7 @@ public class MrFoody extends AppCompatActivity
 
     public Drawer result;
     private OnFilterChangedListener onFilterChangedListener;
+
 
     public void setOnFilterChangedListener(OnFilterChangedListener onFilterChangedListener) {
         this.onFilterChangedListener = onFilterChangedListener;
@@ -156,19 +158,54 @@ public class MrFoody extends AppCompatActivity
                 .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
                     @Override
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
-                        if (drawerItem != null) {
-                            if (drawerItem instanceof Nameable) {
-                                toolbar.setTitle(((Nameable) drawerItem).getName().getText(MrFoody.this));
-                            }
-                            if (onFilterChangedListener != null) {
-                                onFilterChangedListener.onFilterChanged(drawerItem.getIdentifier());
-                            }
+                        Fragment fragment = null;
+                        Class fragmentClass = null;
+                        switch (position) {
+                            case 0:
+                                //fragment = new orders();
+                                break;
+                            case 1:
+                                fragment = new newRegistration();
+                                break;
+                            case 2:
+                                fragment = new orders();
+                                break;
+                            case 3:
+                                fragment = new cartInfo();
+                                break;
+                            case 4:
+                                fragment = new fragmentHome();
+                                break;
+                            case 5:
+                                fragment = new fragmentHome();
+                                break;
+                            default:
+                                fragment = new fragmentHome();
+                                break;
                         }
+                        try {
+                            fragment = (Fragment) fragmentClass.newInstance();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        // Insert the fragment by replacing any existing fragment
+                        FragmentManager fragmentManager = getSupportFragmentManager();
+                        fragmentManager.beginTransaction().replace(R.id.your_placeholder, fragment).commit();
 
                         return false;
                     }
                 })
                 .build();
+
+        fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //fragment = new cartInfo();
+                //Intent intent = new Intent(MrFoody.this, NewMessageActivity.class);
+                //startActivity(intent);
+            }
+        });
 
         //disable scrollbar :D it's ugly
         result.getRecyclerView().setVerticalScrollBarEnabled(false);
@@ -260,24 +297,6 @@ public class MrFoody extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
-    }
-
-    private void addDrawerItems() {
-        mAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, ar);
-        mDrawerList.setAdapter(mAdapter);
-
-        mDrawerList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(MrFoody.this, "Time for an upgrade!", Toast.LENGTH_SHORT).show();
-                int category_id = position;
-                System.out.println("Main category id clicked" + category_id);
-                catalogCategoryLevel catalogCategoryLevel = catalogCategoryLevels.get(position);
-                Log.d("Main clicked categoryID", catalogCategoryLevel.getCategoryId());
-                new catalogSubCategoryLevelAsyncTask().execute(Integer.valueOf(catalogCategoryLevel.getCategoryId()));
-
-            }
-        });
     }
 
     /*getting session id from mrfoody.co.in store */
@@ -488,6 +507,10 @@ public class MrFoody extends AppCompatActivity
             return null;
         }
 
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+        }
     }
 
     public class catalogCategoryAssignedProductsAsyncTask extends AsyncTask<Integer, String, String> {

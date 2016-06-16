@@ -2,7 +2,6 @@ package in.co.mrfoody.mrfoody.ui.userActivities;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -66,8 +65,8 @@ public class login extends Activity {
             @Override
             public void onClick(View v) {
                 // Start the Signup activity
-                Intent intent = new Intent(getApplicationContext(), registration.class);
-                startActivityForResult(intent, REQUEST_SIGNUP);
+                //Intent intent = new Intent(getApplicationContext(), registration.class);
+                //startActivityForResult(intent, REQUEST_SIGNUP);
             }
         });
 
